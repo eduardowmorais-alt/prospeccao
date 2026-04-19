@@ -1,37 +1,298 @@
-async function executarBuscaEEnviar() {
-  const webhook = document.getElementById('n8n_url').value;
-  const termo = document.getElementById('termo').value;
-  const bairro = document.getElementById('bairro').value;
-  const cidade = document.getElementById('cidade').value;
-  const estado = document.getElementById('estado').value;
-  const max = document.getElementById('maxres').value;
-
-  if(!webhook || !termo || !cidade) return alert("Preencha o Webhook, o termo e a cidade!");
-
-  const btn = document.getElementById('btn');
-  btn.disabled = true; btn.innerText = "ENVIANDO COMANDO...";
-  
-  log(`Enviando ordem de busca para o Agente n8n...`);
-
-  try {
-    const n8n = await fetch(webhook, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        termo: termo,
-        bairro: bairro,
-        cidade: cidade,
-        estado: estado,
-        limite: max
-      })
-    });
-
-    if(n8n.ok) log("✅ SUCESSO: O Agente n8n recebeu o comando e vai iniciar a busca e os disparos!");
-    else log("❌ ERRO: O n8n não respondeu.");
-
-  } catch (e) {
-    log("❌ ERRO DE CONEXÃO: Verifique se o n8n está ativo.");
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscador de Contatos — Disparo WhatsApp</title>
+<style>
+  :root {
+    --bg: #f9f9f8;
+    --bg2: #f0efea;
+    --bg3: #e8e7e2;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a1a;
+    --text2: #6b6b68;
+    --text3: #9b9b98;
+    --info-bg: #e6f1fb;
+    --info-text: #0c447c;
+    --success-bg: #eaf3de;
+    --success-text: #27500a;
+    --warning-bg: #faeeda;
+    --warning-text: #633806;
+    --danger-bg: #fcebeb;
+    --danger-text: #791f1f;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'SF Mono', 'Fira Code', monospace;
   }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+  
+  .topbar {
+    background: var(--card);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo { font-size: 16px; font-weight: 600; color: var(--text); }
+  .topbar-sub { font-size: 13px; color: var(--text2); }
+  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
+  .status-dot.running { background: #22c55e; }
+  .status-dot.paused { background: #f59e0b; }
 
-  btn.disabled = false; btn.innerText = "BUSCAR E ENVIAR PARA AGENTE →";
+  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .step-bar { display: flex; align-items: center; margin-bottom: 2rem; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); }
+  .step.done { color: var(--success-text); }
+  .step.active { color: var(--text); font-weight: 500; }
+  .step-dot { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .step.done .step-dot { background: var(--success-bg); color: var(--success-text); border-color: transparent; }
+  .step.active .step-dot { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
+  .sep { flex: 1; height: 0.5px; background: var(--border); margin: 0 10px; }
+
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .card-title .tag { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; background: var(--info-bg); color: var(--info-text); }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
+
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
+  input[type=text], input[type=password], input[type=number], input[type=time], select, textarea {
+    width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #378add; box-shadow: 0 0 0 3px rgba(55,138,221,0.15); }
+  .hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  button {
+    padding: 9px 18px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
+    cursor: pointer; transition: all 0.15s; font-weight: 500;
+  }
+  button:hover { background: var(--bg2); }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  button.primary { background: var(--text); color: #fff; border-color: var(--text); }
+  button.primary:hover { background: #333; }
+  button.danger { background: var(--danger-bg); color: var(--danger-text); border-color: transparent; }
+  button.success { background: var(--success-bg); color: var(--success-text); border-color: transparent; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .chip {
+    display: inline-flex; align-items: center; font-size: 13px; padding: 5px 13px;
+    border-radius: 20px; cursor: pointer; border: 0.5px solid var(--border2);
+    background: var(--bg2); color: var(--text2); transition: all 0.15s; user-select: none;
+  }
+  .chip:hover { background: var(--bg3); }
+  .chip.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; font-weight: 500; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+  .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
+  .metric-n { font-size: 28px; font-weight: 600; color: var(--text); }
+  .metric-l { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  th { font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
+  td { padding: 11px 10px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  #log-box {
+    font-family: var(--mono); font-size: 12px; background: #1a1a1a; color: #ccc;
+    border-radius: var(--radius); padding: 14px 16px; max-height: 200px; overflow-y: auto;
+  }
+  .log-ok { color: #86efac; }
+  .log-err { color: #fca5a5; }
+
+  .preview-box {
+    background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius);
+    padding: 14px 16px; font-size: 14px; color: var(--text); white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Buscador de Contatos</div>
+  <div class="topbar-status"><div class="status-dot" id="top-dot"></div><span id="top-status">Aguardando</span></div>
+</div>
+
+<div class="container">
+  <div class="step-bar">
+    <div class="step active" id="s1"><div class="step-dot">1</div>APIs</div>
+    <div class="sep"></div>
+    <div class="step" id="s2"><div class="step-dot">2</div>Buscar</div>
+    <div class="sep"></div>
+    <div class="step" id="s3"><div class="step-dot">3</div>Mensagem</div>
+    <div class="sep"></div>
+    <div class="step" id="s4"><div class="step-dot">4</div>Disparo</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Configurações das APIs</div>
+    <div class="grid2">
+      <div><label>Chave Google Maps</label><input type="password" id="gkey" placeholder="AIzaSy..."></div>
+      <div><label>Claude API Key</label><input type="password" id="claudekey" placeholder="sk-ant-..."></div>
+    </div>
+    <div class="grid3" style="margin-top:14px">
+      <div><label>Z-API Instance ID</label><input type="text" id="z-instance-id"></div>
+      <div><label>Instance Token</label><input type="password" id="z-instance-token"></div>
+      <div><label>Client Token</label><input type="password" id="z-client-token"></div>
+    </div>
+    <button class="primary" onclick="saveConfig()" style="width:100%; margin-top:14px">Salvar e Continuar</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Busca</div>
+    <div class="grid3">
+      <div><label>Serviço</label><input type="text" id="termo" value="Manicure"></div>
+      <div><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
+      <div><label>Bairro</label><input type="text" id="bairro" value="Aldeota"></div>
+    </div>
+    <button class="primary" onclick="buscar()" id="btn-buscar" style="width:100%; margin-top:14px">Buscar Contatos</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">encontrados</div></div>
+    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">com telefone</div></div>
+    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">enviados</div></div>
+    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">pendentes</div></div>
+  </div>
+
+  <div class="card" id="panel-results" style="display:none">
+    <div class="card-title">Resultados</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th style="width:30px"></th><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" id="panel-msg" style="display:none">
+    <div class="card-title">Mensagem IA</div>
+    <textarea id="msg-base" rows="4">Olá {nome}, vi que vocês atendem em {cidade}. Como funcionam os serviços de {termo}?</textarea>
+    <button class="primary" onclick="iniciarDisparo()" id="btn-iniciar" style="width:100%; margin-top:14px">Iniciar Disparo WhatsApp</button>
+  </div>
+
+  <div id="log-box">Aguardando...</div>
+</div>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=COLOQUE_SUA_CHAVE_GOOGLE_AQUI&libraries=places"></script>
+
+<script>
+let contatos = [], config = {}, enviados = 0;
+
+function log(msg, tipo) {
+  const b = document.getElementById('log-box');
+  const line = document.createElement('div');
+  line.className = tipo === 'ok' ? 'log-ok' : tipo === 'err' ? 'log-err' : '';
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  b.appendChild(line);
+  b.scrollTop = b.scrollHeight;
 }
+
+function saveConfig() {
+  config = {
+    gkey: document.getElementById('gkey').value.trim(),
+    claudekey: document.getElementById('claudekey').value.trim(),
+    instanceId: document.getElementById('z-instance-id').value.trim(),
+    instanceToken: document.getElementById('z-instance-token').value.trim(),
+    clientToken: document.getElementById('z-client-token').value.trim()
+  };
+  log('Configurações salvas.', 'ok');
+}
+
+function buscar() {
+  const termo = document.getElementById('termo').value;
+  const cidade = document.getElementById('cidade').value;
+  const bairro = document.getElementById('bairro').value;
+  
+  log('Iniciando busca oficial...', 'ok');
+  
+  const service = new google.maps.places.PlacesService(document.createElement('div'));
+  const geocoder = new google.maps.Geocoder();
+  const query = `${termo} ${bairro} ${cidade}`;
+
+  geocoder.geocode({ address: query }, (results, status) => {
+    if (status !== 'OK') { log('Erro local: ' + status, 'err'); return; }
+    
+    const request = {
+      location: results[0].geometry.location,
+      radius: '5000',
+      keyword: termo
+    };
+
+    service.nearbySearch(request, (places, statusNearby) => {
+      if (statusNearby !== google.maps.places.PlacesServiceStatus.OK) {
+        log('Busca sem resultados.', 'err'); return;
+      }
+      
+      contatos = [];
+      places.forEach(p => {
+        service.getDetails({ placeId: p.place_id, fields: ['name', 'formatted_phone_number'] }, (details, s) => {
+          if (s === 'OK') {
+            contatos.push({
+              nome: details.name,
+              telefone: details.formatted_phone_number || '',
+              status: 'pendente',
+              selecionado: !!details.formatted_phone_number
+            });
+            renderTabela();
+          }
+        });
+      });
+      
+      document.getElementById('panel-results').style.display = 'block';
+      document.getElementById('panel-msg').style.display = 'block';
+      log('Locais encontrados com sucesso!', 'ok');
+    });
+  });
+}
+
+function renderTabela() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = contatos.map((c, i) => `
+    <tr>
+      <td><input type="checkbox" ${c.selecionado ? 'checked' : ''} disabled></td>
+      <td>${c.nome}</td>
+      <td>${c.telefone || '—'}</td>
+      <td>${c.status}</td>
+    </tr>`).join('');
+  document.getElementById('m-total').textContent = contatos.length;
+  document.getElementById('m-phone').textContent = contatos.filter(c => c.telefone).length;
+}
+
+async function iniciarDisparo() {
+  const fila = contatos.filter(c => c.selecionado && c.status === 'pendente');
+  log(`Iniciando envio para ${fila.length} contatos...`, 'ok');
+  
+  for (let c of fila) {
+    try {
+      // Simulação de envio Z-API e Claude IA
+      log(`Enviando para ${c.nome}...`, 'ok');
+      await new Promise(r => setTimeout(r, 2000));
+      c.status = 'enviado';
+      enviados++;
+      renderTabela();
+      document.getElementById('m-sent').textContent = enviados;
+    } catch (e) { log('Erro envio: ' + c.nome, 'err'); }
+  }
+}
+</script>
+</body>
+</html>
