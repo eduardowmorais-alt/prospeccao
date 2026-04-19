@@ -3,165 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscador de Contatos — Disparo WhatsApp</title>
-
-<script async defer 
-src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbSmfsgUVtmR9FbDIdMeX4lePOl138GXQ&libraries=places">
-</script>
-
+<title>Buscador Minha Manicure — Painel de Controle</title>
 <style>
-body { font-family: Arial; background:#f5f5f5; padding:20px; }
-input,button { padding:10px; margin:5px; }
-#log { background:#000; color:#0f0; padding:10px; height:150px; overflow:auto; font-size:12px;}
-table { width:100%; margin-top:10px; border-collapse: collapse;}
-td,th { border:1px solid #ccc; padding:5px; }
+  :root {
+    --bg: #f9f9f8; --card: #ffffff; --border: rgba(0,0,0,0.12);
+    --text: #1a1a1a; --text2: #6b6b68; --info-bg: #e6f1fb;
+    --info-text: #0c447c; --radius: 8px; --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); padding: 2rem; }
+  .container { max-width: 800px; margin: 0 auto; }
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 18px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
+  input, select { width: 100%; padding: 10px; border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 15px; }
+  button { width: 100%; padding: 12px; border-radius: var(--radius); border: none; background: #1a1a1a; color: white; font-weight: 600; cursor: pointer; }
+  button:disabled { background: #ccc; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+  #log { font-family: monospace; font-size: 12px; background: #1a1a1a; color: #86efac; padding: 15px; border-radius: var(--radius); height: 150px; overflow-y: auto; margin-top: 20px; }
 </style>
 </head>
-
 <body>
 
-<h2>Buscador + Disparo WhatsApp</h2>
+<div class="container">
+  <div class="card">
+    <div class="card-title">⚙️ Configuração Principal</div>
+    <label>Google Maps API Key</label>
+    <input type="password" id="gkey" placeholder="AIzaSy...">
+    <label>URL do Webhook n8n (Test ou Production)</label>
+    <input type="text" id="n8n_url" value="http://137.184.209.187:5678/webhook-test/buscar-manicure">
+  </div>
 
-<input id="termo" placeholder="Ex: Manicure">
-<input id="cidade" placeholder="Cidade">
-<button onclick="buscar()">Buscar</button>
+  <div class="card">
+    <div class="card-title">🔍 Filtros de Busca</div>
+    <label>O que buscar? (ex: Manicure, Barbearia)</label>
+    <input type="text" id="termo" placeholder="Ex: Manicure">
+    
+    <div class="grid">
+      <div><label>Bairro</label><input type="text" id="bairro"></div>
+      <div><label>Cidade</label><input type="text" id="cidade"></div>
+      <div><label>Estado</label><input type="text" id="estado"></div>
+    </div>
 
-<br><br>
+    <div class="grid">
+      <div>
+        <label>Máximo Resultados</label>
+        <select id="maxres">
+          <option value="20">20</option>
+          <option value="60" selected>60</option>
+        </select>
+      </div>
+      <div>
+        <label>Avaliação Mínima</label>
+        <select id="minrating">
+          <option value="0">Todas</option>
+          <option value="4">4.0+</option>
+        </select>
+      </div>
+    </div>
 
-<input id="z-id" placeholder="Instance ID">
-<input id="z-token" placeholder="Instance Token">
-<input id="z-client" placeholder="Client Token">
+    <button id="btn" onclick="executarBuscaEEnviar()">BUSCAR E ENVIAR PARA AGENTE →</button>
+  </div>
 
-<br><br>
-<button onclick="iniciarDisparo()">Disparar WhatsApp</button>
-
-<table>
-<thead><tr><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
-<tbody id="tbody"></tbody>
-</table>
-
-<div id="log"></div>
+  <div id="log">Aguardando comando...</div>
+</div>
 
 <script>
-
-let contatos = [];
-let enviados = 0;
-
-function log(msg){
-  const el = document.getElementById('log');
-  el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
-  el.scrollTop = el.scrollHeight;
+function log(m) { 
+  const l = document.getElementById('log');
+  l.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${m}</div>`;
+  l.scrollTop = l.scrollHeight;
 }
 
-// 🔥 BUSCA CORRIGIDA
-function buscar(){
-
-  if (typeof google === 'undefined' || !google.maps) {
-    log("⏳ Google ainda carregando... tentando novamente...");
-    setTimeout(buscar,2000);
-    return;
-  }
-
+async function executarBuscaEEnviar() {
+  const gkey = document.getElementById('gkey').value;
+  const webhook = document.getElementById('n8n_url').value;
   const termo = document.getElementById('termo').value;
   const cidade = document.getElementById('cidade').value;
+  const max = document.getElementById('maxres').value;
 
-  const map = new google.maps.Map(document.createElement('div'));
-  const service = new google.maps.places.PlacesService(map);
+  if(!gkey || !termo || !cidade) return alert("Preencha a chave, o termo e a cidade!");
 
-  contatos = [];
+  const btn = document.getElementById('btn');
+  btn.disabled = true; btn.innerText = "BUSCANDO NO GOOGLE...";
+  
+  log(`Iniciando busca de ${termo} em ${cidade}...`);
 
-  service.textSearch({ query: `${termo} em ${cidade}` }, (results, status) => {
+  try {
+    // 1. Localiza as coordenadas
+    const geo = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${termo}+${cidade}&key=${gkey}`);
+    const geoData = await geo.json();
+    const loc = geoData.results[0].geometry.location;
 
-    if (status !== google.maps.places.PlacesServiceStatus.OK){
-      log("Erro: "+status);
-      return;
-    }
+    // 2. Busca os locais
+    const placesResp = await fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${loc.lat},${loc.lng}&radius=5000&keyword=${termo}&key=${gkey}`);
+    const placesData = await placesResp.json();
+    
+    log(`Encontrados ${placesData.results.length} locais. Enviando para o n8n...`);
 
-    let total = results.length;
-    let done = 0;
-
-    results.forEach(p => {
-      service.getDetails({
-        placeId: p.place_id,
-        fields: ['name','formatted_phone_number']
-      }, (d, s2) => {
-
-        done++;
-
-        if (s2 === google.maps.places.PlacesServiceStatus.OK){
-          contatos.push({
-            nome: d.name,
-            telefone: d.formatted_phone_number || '',
-            status: d.formatted_phone_number ? 'Pendente' : 'Sem telefone'
-          });
-        }
-
-        if (done === total){
-          render();
-          log("Busca finalizada!");
-        }
-
-      });
-    });
-
-  });
-}
-
-function render(){
-  document.getElementById('tbody').innerHTML = contatos.map(c=>`
-    <tr>
-      <td>${c.nome}</td>
-      <td>${c.telefone}</td>
-      <td>${c.status}</td>
-    </tr>
-  `).join('');
-}
-
-// 🚀 DISPARO
-async function iniciarDisparo(){
-  log("Iniciando disparo...");
-
-  for (let c of contatos){
-    if (c.telefone && c.status === 'Pendente'){
-
-      await enviar(c);
-
-      await new Promise(r=>setTimeout(r,30000)); // 30s
-    }
-  }
-}
-
-async function enviar(c){
-
-  const id = document.getElementById('z-id').value;
-  const token = document.getElementById('z-token').value;
-  const client = document.getElementById('z-client').value;
-
-  const phone = '55'+c.telefone.replace(/\D/g,'');
-
-  try{
-    const res = await fetch(`https://api.z-api.io/instances/${id}/token/${token}/send-text`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Client-Token':client},
+    // 3. Envia a lista para o n8n processar (Z-API e Claude)
+    const n8n = await fetch(webhook, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        phone,
-        message: `Olá ${c.nome}, tudo bem?`
+        termo: termo,
+        cidade: cidade,
+        contatos: placesData.results // O n8n vai receber a lista completa aqui
       })
     });
 
-    if(res.ok){
-      c.status='Enviado';
-      enviados++;
-      log(`Enviado para ${c.nome}`);
-      render();
-    }
+    if(n8n.ok) log("✅ SUCESSO: Dados enviados ao Agente n8n!");
+    else log("❌ ERRO: n8n não respondeu corretamente.");
 
-  }catch(e){
-    log("Erro envio: "+e.message);
+  } catch (e) {
+    log("❌ ERRO CRÍTICO: " + e.message);
   }
+
+  btn.disabled = false; btn.innerText = "BUSCAR E ENVIAR PARA AGENTE →";
 }
-
 </script>
-
 </body>
 </html>
