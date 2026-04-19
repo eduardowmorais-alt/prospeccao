@@ -1,172 +1,36 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscador Minha Manicure — Coletor</title>
-<style>
-  :root {
-    --bg: #f9f9f8; --card: #ffffff; --border: rgba(0,0,0,0.12);
-    --text: #1a1a1a; --text2: #6b6b68; --radius: 8px; --radius-lg: 12px;
-    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); padding: 2rem; }
-  .container { max-width: 900px; margin: 0 auto; }
-  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
-  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; }
-  input, select { width: 100%; padding: 10px; border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; font-family: inherit; }
-  button { width: 100%; padding: 12px; border-radius: var(--radius); border: none; background: #1a1a1a; color: white; font-weight: 600; cursor: pointer; margin-top: 10px;}
-  button.n8n { background: #ff6b6b; margin-top: 20px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; table-layout: fixed; }
-  th, td { text-align: left; padding: 8px; border-bottom: 0.5px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #log { font-family: monospace; font-size: 11px; background: #eee; padding: 10px; border-radius: 5px; margin-top: 10px; max-height: 100px; overflow-y: auto; }
-</style>
-</head>
-<body>
+// ... (mantenha o CSS igual ao seu arquivo anterior)
 
-<div class="container">
-  <div class="card">
-    <div class="card-title"><strong>1. Configuração</strong></div>
-    <label>Chave Google Maps</label>
-    <input type="password" id="gkey" placeholder="AIzaSy...">
-    <label>URL Webhook n8n</label>
-    <input type="text" id="webhook" value="http://137.184.209.187:5678/webhook-test/buscar-manicure">
-  </div>
-
-  <div class="card">
-    <div class="card-title"><strong>2. Filtros de Busca</strong></div>
-    <div class="grid">
-      <div><label>Serviço</label><input type="text" id="termo" value="Manicure"></div>
-      <div><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
-      <div><label>Bairro</label><input type="text" id="bairro" value="Aldeota"></div>
-      <div>
-        <label>Quantidade (Máx 60)</label>
-        <select id="qtd">
-          <option value="20">20 resultados</option>
-          <option value="40">40 resultados</option>
-          <option value="60">60 resultados</option>
-        </select>
-      </div>
-    </div>
-    <button id="btn-busca" onclick="buscar()">BUSCAR NO GOOGLE</button>
-  </div>
-
-  <div class="card" id="resultados" style="display:none">
-    <strong>Contatos Encontrados: <span id="count">0</span></strong>
-    <table id="tabela">
-      <thead><tr><th>Nome</th><th>Telefone</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <button class="n8n" id="btn-n8n" onclick="enviarParaN8N()">🚀 ENVIAR TODOS PARA AUTOMAÇÃO (N8N)</button>
-  </div>
-
-  <div id="log">Aguardando comando...</div>
-</div>
-
-<script>
-let listaContatos = [];
-let mapsService;
-
-function log(m) { document.getElementById('log').innerText = `[LOG]: ${m}`; }
-
-function buscar() {
-  const key = document.getElementById('gkey').value;
-  if(!key) return alert("Insira a chave do Google!");
-  
-  const btn = document.getElementById('btn-busca');
-  btn.disabled = true; btn.innerText = "CARREGANDO MAPS...";
-
-  if (typeof google === 'undefined') {
-    const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
-    s.onload = iniciarBuscaReal;
-    document.head.appendChild(s);
-  } else {
-    iniciarBuscaReal();
-  }
-}
-
-function iniciarBuscaReal() {
-  const termo = document.getElementById('termo').value;
-  const cidade = document.getElementById('cidade').value;
-  const bairro = document.getElementById('bairro').value;
-  const limiteMax = parseInt(document.getElementById('qtd').value);
-  const query = `${termo} ${bairro} ${cidade}`;
-  
-  listaContatos = [];
-  log("Iniciando busca...");
-  mapsService = new google.maps.places.PlacesService(document.createElement('div'));
-  
   const processarResultados = (results, status, pagination) => {
-    if (status === "OK") {
+    if (status === google.maps.places.PlacesServiceStatus.OK || status === "OK") {
       results.forEach(p => {
-        listaContatos.push({ nome: p.name, place_id: p.place_id, telefone: 'Carregando...' });
+        // Evita duplicados pelo Place ID
+        if (!listaContatos.find(c => c.place_id === p.place_id)) {
+          listaContatos.push({ 
+            nome: p.name, 
+            place_id: p.place_id, 
+            telefone: 'Carregando...', 
+            endereco: p.formatted_address || p.vicinity 
+          });
+        }
       });
       
       render();
 
+      // REGRA DE OURO: O Google exige um delay de pelo menos 2 segundos para o token da próxima página ativar
       if (pagination && pagination.hasNextPage && listaContatos.length < limiteMax) {
-        log(`Buscando mais resultados (${listaContatos.length})...`);
-        setTimeout(() => pagination.nextPage(), 2000); // Pausa obrigatória do Google
+        log(`Aguardando autorização do Google para buscar mais (Já temos ${listaContatos.length})...`);
+        setTimeout(() => {
+          pagination.nextPage();
+        }, 2200); 
       } else {
-        log("Busca concluída! Coletando telefones...");
+        log("Busca concluída! Coletando telefones de contato...");
         extrairTelefones();
         document.getElementById('btn-busca').disabled = false;
         document.getElementById('btn-busca').innerText = "BUSCAR NO GOOGLE";
       }
+    } else {
+      log("Aviso do Google: " + status);
+      if(listaContatos.length > 0) extrairTelefones(); // Se já buscou alguns, processa o que tem
+      document.getElementById('btn-busca').disabled = false;
     }
   };
-
-  mapsService.textSearch({ query: query }, processarResultados);
-}
-
-function extrairTelefones() {
-  listaContatos.forEach((contato, i) => {
-    setTimeout(() => {
-      mapsService.getDetails({ 
-        placeId: contato.place_id, 
-        fields: ['formatted_phone_number'] 
-      }, (details, s) => {
-        if (s === "OK") {
-          listaContatos[i].telefone = details.formatted_phone_number || "Sem Telefone";
-          render();
-        }
-      });
-    }, i * 300); // Delay para não travar a API do Google
-  });
-}
-
-function render() {
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = listaContatos.map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td></tr>`).join('');
-  document.getElementById('resultados').style.display = 'block';
-  document.getElementById('count').innerText = listaContatos.length;
-}
-
-async function enviarParaN8N() {
-  const url = document.getElementById('webhook').value;
-  const btn = document.getElementById('btn-n8n');
-  const contatosValidos = listaContatos.filter(c => c.telefone && c.telefone !== "Sem Telefone" && c.telefone !== "Carregando...");
-  
-  if(contatosValidos.length === 0) return alert("Nenhum contato com telefone para enviar!");
-
-  btn.disabled = true; btn.innerText = "ENVIANDO...";
-  log(`Enviando ${contatosValidos.length} contatos para o n8n...`);
-  
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ contatos: contatosValidos })
-    });
-    if(resp.ok) alert("🚀 Sucesso! O n8n recebeu a lista e vai processar.");
-    else alert("Erro ao enviar para o n8n.");
-  } catch(e) {
-    alert("Erro de conexão com o n8n.");
-  }
-  btn.disabled = false; btn.innerText = "🚀 ENVIAR TODOS PARA AUTOMAÇÃO (N8N)";
-}
-</script>
-</body>
-</html>
