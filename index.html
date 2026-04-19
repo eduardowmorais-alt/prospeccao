@@ -84,16 +84,23 @@ async function buscar() {
   if(!key) return alert("Por favor, insira sua Chave do Google Maps.");
 
   const btn = document.getElementById('btn-buscar');
-  btn.disabled = true; btn.innerText = "CARREGANDO BIBLIOTECA...";
+  btn.disabled = true; 
+  btn.innerText = "CARREGANDO MAPS...";
 
+  // Carregamento assíncrono (resolve o aviso de performance do console)
   if (typeof google === 'undefined') {
     const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    // Adicionei 'async' e 'defer' para seguir a recomendação do Google
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&callback=initBusca`;
+    s.async = true;
+    s.defer = true;
+    
+    // Criamos uma função global temporária para o Google chamar quando terminar de carregar
+    window.initBusca = () => executarBusca(max);
     document.head.appendChild(s);
-    await new Promise(r => s.onload = r);
+  } else {
+    executarBusca(max);
   }
-
-  executarBusca(max);
 }
 
 function executarBusca(maxres) {
