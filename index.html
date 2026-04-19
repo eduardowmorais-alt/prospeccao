@@ -1,36 +1,89 @@
-// ... (mantenha o CSS igual ao seu arquivo anterior)
+// Dentro do seu script, substitua a função buscar() por esta:
 
-  const processarResultados = (results, status, pagination) => {
+async function buscar() {
+  const termo = document.getElementById('termo').value.trim();
+  const cidade = document.getElementById('cidade').value.trim();
+  const bairro = document.getElementById('bairro').value.trim();
+  const maxres = parseInt(document.getElementById('maxres').value);
+  const minrating = parseFloat(document.getElementById('minrating').value);
+
+  if (!config.gkey) { log('Salve as configurações antes de buscar.', 'err'); return; }
+  if (!termo || !cidade) { log('Preencha o tipo de serviço e a cidade.', 'err'); return; }
+
+  const btn = document.getElementById('btn-buscar');
+  btn.textContent = 'Carregando Biblioteca...'; btn.disabled = true;
+
+  // 1. Carrega o script do Google se ainda não existir
+  if (typeof google === 'undefined') {
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${config.gkey}&libraries=places`;
+    document.head.appendChild(s);
+    await new Promise(r => s.onload = r);
+  }
+
+  log(`Iniciando busca otimizada para ${maxres} contatos...`, 'i');
+  const query = `${termo} ${bairro} ${cidade}`;
+  const service = new google.maps.places.PlacesService(document.createElement('div'));
+  
+  contatos = [];
+  let rounds = 0;
+
+  const callback = (results, status, pagination) => {
     if (status === google.maps.places.PlacesServiceStatus.OK || status === "OK") {
       results.forEach(p => {
-        // Evita duplicados pelo Place ID
-        if (!listaContatos.find(c => c.place_id === p.place_id)) {
-          listaContatos.push({ 
+        if (!contatos.find(c => c.id === p.place_id)) {
+          contatos.push({ 
+            id: p.place_id, 
             nome: p.name, 
-            place_id: p.place_id, 
-            telefone: 'Carregando...', 
-            endereco: p.formatted_address || p.vicinity 
+            telefone: 'Aguardando...', 
+            endereco: p.formatted_address || p.vicinity, 
+            rating: p.rating || 0, 
+            status: 'pendente', 
+            selecionado: true 
           });
         }
       });
-      
-      render();
 
-      // REGRA DE OURO: O Google exige um delay de pelo menos 2 segundos para o token da próxima página ativar
-      if (pagination && pagination.hasNextPage && listaContatos.length < limiteMax) {
-        log(`Aguardando autorização do Google para buscar mais (Já temos ${listaContatos.length})...`);
-        setTimeout(() => {
-          pagination.nextPage();
-        }, 2200); 
+      renderTabela();
+      atualizarMetricas();
+
+      // Lógica corrigida para 40/60 resultados
+      if (pagination && pagination.hasNextPage && contatos.length < maxres) {
+        log(`Google autorizou mais resultados. Aguardando pausa obrigatória...`, 'i');
+        // O Google exige 2 segundos exatos para ativar o próximo token
+        setTimeout(() => pagination.nextPage(), 2100);
       } else {
-        log("Busca concluída! Coletando telefones de contato...");
-        extrairTelefones();
-        document.getElementById('btn-busca').disabled = false;
-        document.getElementById('btn-busca').innerText = "BUSCAR NO GOOGLE";
+        log(`Busca finalizada com ${contatos.length} locais. Coletando telefones...`, 'ok');
+        buscarDetalhesUmPorUm(service);
       }
     } else {
-      log("Aviso do Google: " + status);
-      if(listaContatos.length > 0) extrairTelefones(); // Se já buscou alguns, processa o que tem
-      document.getElementById('btn-busca').disabled = false;
+      log("Erro na busca: " + status, "err");
+      btn.textContent = 'Buscar contatos →'; btn.disabled = false;
     }
   };
+
+  service.textSearch({ query: query }, callback);
+}
+
+// Nova função para pegar telefones sem travar a API
+function buscarDetalhesUmPorUm(service) {
+  contatos.forEach((c, i) => {
+    setTimeout(() => {
+      service.getDetails({ placeId: c.id, fields: ['formatted_phone_number'] }, (place, status) => {
+        if (status === "OK" && place) {
+          contatos[i].telefone = place.formatted_phone_number || "Sem Telefone";
+          contatos[i].selecionado = !!place.formatted_phone_number;
+        } else {
+          contatos[i].telefone = "Não listado";
+          contatos[i].selecionado = false;
+        }
+        renderTabela();
+        atualizarMetricas();
+        if(i === contatos.length - 1) {
+          document.getElementById('btn-buscar').textContent = 'Buscar contatos →';
+          document.getElementById('btn-buscar').disabled = false;
+        }
+      });
+    }, i * 400); // 400ms entre cada pedido de telefone evita o erro de "Over Query Limit"
+  }
+}
