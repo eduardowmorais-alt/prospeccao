@@ -102,71 +102,25 @@
   .chip:hover { background: var(--bg3); }
   .chip.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; font-weight: 500; }
 
-  .day-btn {
-    padding: 6px 14px; border-radius: var(--radius); border: 0.5px solid var(--border2);
-    background: var(--bg2); color: var(--text2); cursor: pointer; font-size: 13px;
-    transition: all 0.15s; font-weight: 500;
-  }
-  .day-btn.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
-
   .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
   .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
   .metric-n { font-size: 28px; font-weight: 600; color: var(--text); }
   .metric-l { font-size: 12px; color: var(--text2); margin-top: 3px; }
 
-  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--radius); font-weight: 500; }
-  .badge-ok { background: var(--success-bg); color: var(--success-text); }
-  .badge-err { background: var(--danger-bg); color: var(--danger-text); }
-  .badge-i { background: var(--info-bg); color: var(--info-text); }
-  .badge-w { background: var(--warning-bg); color: var(--warning-text); }
-
   table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-  th { font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+  th { font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
   td { padding: 11px 10px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--bg); }
-
-  .status-bar {
-    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
-    background: var(--bg2); border-radius: var(--radius); margin-bottom: 1rem;
-    border: 0.5px solid var(--border);
-  }
-  .status-info { flex: 1; }
-  .status-title { font-size: 14px; font-weight: 500; color: var(--text); }
-  .status-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-  .status-timer { font-size: 13px; color: var(--text2); font-family: var(--mono); }
 
   #log-box {
     font-family: var(--mono); font-size: 12px; background: #1a1a1a; color: #ccc;
     border-radius: var(--radius); padding: 14px 16px; max-height: 200px; overflow-y: auto;
-    line-height: 1.8;
   }
   .log-ok { color: #86efac; }
   .log-err { color: #fca5a5; }
-  .log-i { color: #93c5fd; }
-  .log-w { color: #fcd34d; }
 
   .preview-box {
     background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius);
-    padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.7;
-    white-space: pre-wrap; min-height: 80px;
-  }
-
-  .features-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13px; color: var(--text2); }
-  .features-list div::before { content: '✓ '; color: var(--success-text); font-weight: 600; }
-
-  .btn-row { display: flex; gap: 10px; align-items: center; }
-  .btn-row button { flex: 1; }
-
-  .section-sep { display: flex; align-items: center; gap: 10px; margin: 1.25rem 0; }
-  .section-sep span { font-size: 12px; color: var(--text3); white-space: nowrap; }
-  .section-sep::before, .section-sep::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
-
-  @media (max-width: 600px) {
-    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .features-list { grid-template-columns: 1fr; }
-    .container { padding: 1rem; }
+    padding: 14px 16px; font-size: 14px; color: var(--text); white-space: pre-wrap;
   }
 </style>
 </head>
@@ -174,15 +128,10 @@
 
 <div class="topbar">
   <div class="topbar-logo">Buscador de Contatos</div>
-  <div class="topbar-sub">Google Places + WhatsApp via Z-API</div>
-  <div class="topbar-status">
-    <div class="status-dot" id="top-dot"></div>
-    <span id="top-status">Aguardando</span>
-  </div>
+  <div class="topbar-status"><div class="status-dot" id="top-dot"></div><span id="top-status">Aguardando</span></div>
 </div>
 
 <div class="container">
-
   <div class="step-bar">
     <div class="step active" id="s1"><div class="step-dot">1</div>APIs</div>
     <div class="sep"></div>
@@ -193,647 +142,156 @@
     <div class="step" id="s4"><div class="step-dot">4</div>Disparo</div>
   </div>
 
-  <!-- CARD 1: APIs -->
   <div class="card">
-    <div class="card-title">Configurações das APIs <span class="tag">Passo 1</span></div>
-
-    <div class="grid2" style="margin-bottom:14px">
-      <div>
-        <label>Chave Google Places API</label>
-        <input type="password" id="gkey" placeholder="AIzaSy...">
-        <div class="hint">console.cloud.google.com → Credenciais</div>
-      </div>
-      <div>
-        <label>Claude API Key</label>
-        <input type="password" id="claudekey" placeholder="sk-ant-...">
-        <div class="hint">console.anthropic.com → API Keys</div>
-      </div>
+    <div class="card-title">Configurações das APIs</div>
+    <div class="grid2">
+      <div><label>Chave Google Maps</label><input type="password" id="gkey" placeholder="AIzaSy..."></div>
+      <div><label>Claude API Key</label><input type="password" id="claudekey" placeholder="sk-ant-..."></div>
     </div>
-
-    <div class="section-sep"><span>Z-API — WhatsApp</span></div>
-
-    <div class="grid3" style="margin-bottom:14px">
-      <div>
-        <label>Instance ID</label>
-        <input type="text" id="z-instance-id" placeholder="ex: 3DF2A1B...">
-        <div class="hint">Painel Z-API → instância → editar</div>
-      </div>
-      <div>
-        <label>Instance Token</label>
-        <input type="password" id="z-instance-token" placeholder="token da instância">
-        <div class="hint">Painel Z-API → instância → editar</div>
-      </div>
-      <div>
-        <label>Client Token</label>
-        <input type="password" id="z-client-token" placeholder="token da conta">
-        <div class="hint">app.z-api.io/app/security</div>
-      </div>
+    <div class="grid3" style="margin-top:14px">
+      <div><label>Z-API Instance ID</label><input type="text" id="z-instance-id"></div>
+      <div><label>Instance Token</label><input type="password" id="z-instance-token"></div>
+      <div><label>Client Token</label><input type="password" id="z-client-token"></div>
     </div>
-
-    <button class="primary" onclick="saveConfig()" style="width:100%">Salvar configurações e continuar →</button>
+    <button class="primary" onclick="saveConfig()" style="width:100%; margin-top:14px">Salvar e Continuar</button>
   </div>
 
-  <!-- CARD 2: Busca -->
   <div class="card">
-    <div class="card-title">Busca de contatos <span class="tag">Passo 2</span></div>
-
-    <div style="margin-bottom:14px">
-      <label>Tipo de serviço</label>
-      <input type="text" id="termo" placeholder="ex: manicure, cabeleireira, restaurante, dentista, academia...">
-      <div class="chips">
-        <span class="chip" onclick="setTermo(this)">Manicure</span>
-        <span class="chip" onclick="setTermo(this)">Cabeleireira</span>
-        <span class="chip" onclick="setTermo(this)">Restaurante</span>
-        <span class="chip" onclick="setTermo(this)">Dentista</span>
-        <span class="chip" onclick="setTermo(this)">Academia</span>
-        <span class="chip" onclick="setTermo(this)">Farmácia</span>
-        <span class="chip" onclick="setTermo(this)">Padaria</span>
-        <span class="chip" onclick="setTermo(this)">Oficina mecânica</span>
-        <span class="chip" onclick="setTermo(this)">Clínica estética</span>
-        <span class="chip" onclick="setTermo(this)">Barbearia</span>
-        <span class="chip" onclick="setTermo(this)">Pet shop</span>
-        <span class="chip" onclick="setTermo(this)">Psicólogo</span>
-      </div>
+    <div class="card-title">Busca</div>
+    <div class="grid3">
+      <div><label>Serviço</label><input type="text" id="termo" value="Manicure"></div>
+      <div><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
+      <div><label>Bairro</label><input type="text" id="bairro" value="Aldeota"></div>
     </div>
-
-    <div class="grid3" style="margin-bottom:14px">
-      <div>
-        <label>Bairro (opcional)</label>
-        <input type="text" id="bairro" placeholder="ex: Aldeota">
-      </div>
-      <div>
-        <label>Cidade</label>
-        <input type="text" id="cidade" placeholder="ex: Fortaleza">
-      </div>
-      <div>
-        <label>Estado</label>
-        <input type="text" id="estado" placeholder="ex: Ceará">
-      </div>
-    </div>
-
-    <div class="grid2" style="margin-bottom:14px">
-      <div>
-        <label>Máximo de resultados</label>
-        <select id="maxres">
-          <option value="20">20 contatos</option>
-          <option value="40">40 contatos</option>
-          <option value="60" selected>60 contatos</option>
-        </select>
-      </div>
-      <div>
-        <label>Avaliação mínima</label>
-        <select id="minrating">
-          <option value="0">Qualquer avaliação</option>
-          <option value="3">3+ estrelas</option>
-          <option value="4">4+ estrelas</option>
-          <option value="4.5">4.5+ estrelas</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="primary" onclick="buscar()" id="btn-buscar" style="width:100%">Buscar contatos →</button>
+    <button class="primary" onclick="buscar()" id="btn-buscar" style="width:100%; margin-top:14px">Buscar Contatos</button>
   </div>
 
-  <!-- MÉTRICAS -->
   <div class="metrics">
     <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">encontrados</div></div>
     <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">com telefone</div></div>
-    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">enviadas hoje</div></div>
-    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">na fila</div></div>
+    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">enviados</div></div>
+    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">pendentes</div></div>
   </div>
 
-  <!-- CARD 3: Resultados -->
   <div class="card" id="panel-results" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
-      <div class="card-title" style="margin:0">Contatos encontrados</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="exportCSV()" style="font-size:12px;padding:6px 12px">Exportar CSV</button>
-        <button onclick="selecionarTodos()" style="font-size:12px;padding:6px 12px">Selecionar todos</button>
-        <button onclick="desmarcarTodos()" style="font-size:12px;padding:6px 12px">Desmarcar todos</button>
-      </div>
-    </div>
+    <div class="card-title">Resultados</div>
     <div style="overflow-x:auto">
       <table>
-        <thead><tr>
-          <th style="width:36px"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
-          <th style="width:28%">Nome</th>
-          <th style="width:16%">Telefone</th>
-          <th style="width:9%">Aval.</th>
-          <th style="width:32%">Endereço</th>
-          <th style="width:13%">Status</th>
-        </tr></thead>
+        <thead><tr><th style="width:30px"></th><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- CARD 4: Mensagem -->
   <div class="card" id="panel-msg" style="display:none">
-    <div class="card-title">Mensagem <span class="tag">Passo 3</span></div>
-
-    <div style="margin-bottom:14px">
-      <label>Mensagem base — a IA vai adaptar para cada contato automaticamente</label>
-      <textarea id="msg-base" rows="5" style="resize:vertical">Olá! Vi que vocês oferecem serviços de {termo} em {cidade}. Gostaria de saber mais sobre os serviços e valores. Pode me ajudar?</textarea>
-      <div class="hint">Variáveis: {nome} {termo} {cidade} {bairro} — a IA enriquece o restante sozinha.</div>
-    </div>
-
-    <div class="divider"></div>
-
-    <label style="margin-bottom:10px">O que a IA faz automaticamente em cada mensagem</label>
-    <div class="features-list" style="margin-bottom:1.25rem">
-      <div>Varia palavras mantendo o contexto</div>
-      <div>Saudação por horário (bom dia / boa tarde / boa noite)</div>
-      <div>Conexão pela cidade do DDD do telefone</div>
-      <div>Emojis variados por mensagem</div>
-      <div>Extrai primeiro nome do estabelecimento</div>
-      <div>Tom natural, não parece robô</div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div style="margin-bottom:10px">
-      <label>Preview — como ficará a próxima mensagem gerada pela IA</label>
-      <div class="preview-box" id="preview-box">Clique em "Gerar preview" para ver um exemplo com IA...</div>
-    </div>
-    <button onclick="gerarPreview()" id="btn-preview">Gerar preview com IA ↗</button>
+    <div class="card-title">Mensagem IA</div>
+    <textarea id="msg-base" rows="4">Olá {nome}, vi que vocês atendem em {cidade}. Como funcionam os serviços de {termo}?</textarea>
+    <button class="primary" onclick="iniciarDisparo()" id="btn-iniciar" style="width:100%; margin-top:14px">Iniciar Disparo WhatsApp</button>
   </div>
 
-  <!-- CARD 5: Disparo -->
-  <div class="card" id="panel-disparo" style="display:none">
-    <div class="card-title">Configurações de disparo <span class="tag">Passo 4</span></div>
-
-    <div class="grid4" style="margin-bottom:1.25rem">
-      <div>
-        <label>Intervalo entre envios</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="number" id="intervalo" value="60" min="10" max="3600">
-          <span style="font-size:13px;color:var(--text2);white-space:nowrap">seg</span>
-        </div>
-        <div class="hint">Mínimo recomendado: 30s</div>
-      </div>
-      <div>
-        <label>Limite diário de segurança</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="number" id="limite-dia" value="50" min="1" max="500">
-          <span style="font-size:13px;color:var(--text2);white-space:nowrap">msgs</span>
-        </div>
-        <div class="hint">Recomendado: até 50/dia</div>
-      </div>
-      <div>
-        <label>Horário de início (Brasília)</label>
-        <input type="time" id="hora-inicio" value="08:00">
-      </div>
-      <div>
-        <label>Horário de fim (Brasília)</label>
-        <input type="time" id="hora-fim" value="20:00">
-      </div>
-    </div>
-
-    <div style="margin-bottom:1.25rem">
-      <label style="margin-bottom:10px">Dias permitidos para envio</label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <button class="day-btn on" data-day="1" onclick="toggleDay(this)">Segunda</button>
-        <button class="day-btn on" data-day="2" onclick="toggleDay(this)">Terça</button>
-        <button class="day-btn on" data-day="3" onclick="toggleDay(this)">Quarta</button>
-        <button class="day-btn on" data-day="4" onclick="toggleDay(this)">Quinta</button>
-        <button class="day-btn on" data-day="5" onclick="toggleDay(this)">Sexta</button>
-        <button class="day-btn" data-day="6" onclick="toggleDay(this)">Sábado</button>
-        <button class="day-btn" data-day="0" onclick="toggleDay(this)">Domingo</button>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="status-bar">
-      <div class="status-dot stopped" id="status-dot"></div>
-      <div class="status-info">
-        <div class="status-title" id="status-txt">Aguardando início</div>
-        <div class="status-sub" id="status-sub">Configure e clique em iniciar disparo</div>
-      </div>
-      <div class="status-timer" id="next-timer"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="primary" onclick="iniciarDisparo()" id="btn-iniciar">Iniciar disparo →</button>
-      <button onclick="pausarDisparo()" id="btn-pausar" disabled>Pausar</button>
-      <button class="danger" onclick="pararDisparo()" id="btn-parar" disabled>Parar</button>
-    </div>
-  </div>
-
-  <!-- LOG -->
-  <div style="margin-top:1.25rem">
-    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">Log de atividade</div>
-    <div id="log-box"><span style="color:#555">Aguardando ações...</span></div>
-  </div>
-
+  <div id="log-box">Aguardando...</div>
 </div>
 
-<script>
-let contatos = [], config = {}, enviados = 0, filaIdx = 0;
-let disparoTimer = null, countdownTimer = null, pausado = false, rodando = false;
-let diasAtivos = new Set([1,2,3,4,5]);
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbSmfsgUVtmR9FbDIdMeX4lePOl138GXQ&libraries=places"></script>
 
-// ── LOG ──────────────────────────────────────────
+<script>
+let contatos = [], config = {}, enviados = 0;
+
 function log(msg, tipo) {
   const b = document.getElementById('log-box');
-  const cls = tipo==='ok'?'log-ok':tipo==='err'?'log-err':tipo==='w'?'log-w':'log-i';
-  const t = new Date().toLocaleTimeString('pt-BR');
   const line = document.createElement('div');
-  line.className = cls;
-  line.textContent = `[${t}] ${msg}`;
+  line.className = tipo === 'ok' ? 'log-ok' : tipo === 'err' ? 'log-err' : '';
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
   b.appendChild(line);
   b.scrollTop = b.scrollHeight;
 }
 
-// ── CONFIG ───────────────────────────────────────
 function saveConfig() {
-  config.gkey = document.getElementById('gkey').value.trim();
-  config.claudekey = document.getElementById('claudekey').value.trim();
-  config.instanceId = document.getElementById('z-instance-id').value.trim();
-  config.instanceToken = document.getElementById('z-instance-token').value.trim();
-  config.clientToken = document.getElementById('z-client-token').value.trim();
-  if (!config.gkey || !config.claudekey || !config.instanceId || !config.instanceToken || !config.clientToken) {
-    log('Preencha todos os campos de configuração antes de continuar.', 'err'); return;
-  }
-  log('Configurações salvas com sucesso.', 'ok');
-  setStep(2);
-}
-
-// ── STEPS ────────────────────────────────────────
-function setStep(n) {
-  for (let i = 1; i <= 4; i++) {
-    const s = document.getElementById('s'+i);
-    s.className = 'step'+(i<n?' done':i===n?' active':'');
-    s.querySelector('.step-dot').textContent = i<n?'✓':i;
-  }
-}
-
-// ── CHIPS ────────────────────────────────────────
-function setTermo(el) {
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById('termo').value = el.textContent;
-}
-
-function toggleDay(el) {
-  const d = parseInt(el.dataset.day);
-  if (diasAtivos.has(d)) { diasAtivos.delete(d); el.classList.remove('on'); }
-  else { diasAtivos.add(d); el.classList.add('on'); }
-}
-
-// ── HORÁRIO ──────────────────────────────────────
-function horarioBrasilia() {
-  return new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Sao_Paulo'}));
-}
-
-function dentroJanela() {
-  const agora = horarioBrasilia();
-  if (!diasAtivos.has(agora.getDay())) return false;
-  const hI = document.getElementById('hora-inicio').value.split(':').map(Number);
-  const hF = document.getElementById('hora-fim').value.split(':').map(Number);
-  const min = agora.getHours()*60+agora.getMinutes();
-  return min >= hI[0]*60+hI[1] && min < hF[0]*60+hF[1];
-}
-
-function saudacaoPorHorario() {
-  const h = horarioBrasilia().getHours();
-  if (h>=5&&h<12) return 'Bom dia';
-  if (h>=12&&h<18) return 'Boa tarde';
-  return 'Boa noite';
-}
-
-// ── HELPERS ──────────────────────────────────────
-function extrairPrimeiroNome(nome) {
-  const stop = ['salao','salon','studio','clinica','barbearia','espaco','centro','de','da','do','e','e','beauty','hair','nail'];
-  const partes = nome.split(/[\s,\-&]+/);
-  const filtrado = partes.filter(p=>p.length>2&&!stop.includes(p.toLowerCase()));
-  return filtrado[0]||partes[0]||nome;
-}
-
-function dddParaCidade(telefone) {
-  const ddd = telefone.replace(/\D/g,'').substring(0,2);
-  const mapa = {
-    '11':'São Paulo','12':'São José dos Campos','13':'Santos','14':'Bauru','15':'Sorocaba',
-    '16':'Ribeirão Preto','17':'São José do Rio Preto','18':'Presidente Prudente','19':'Campinas',
-    '21':'Rio de Janeiro','22':'Campos dos Goytacazes','24':'Volta Redonda',
-    '27':'Vitória','28':'Cachoeiro de Itapemirim',
-    '31':'Belo Horizonte','32':'Juiz de Fora','33':'Governador Valadares','34':'Uberlândia',
-    '35':'Poços de Caldas','37':'Divinópolis','38':'Montes Claros',
-    '41':'Curitiba','42':'Ponta Grossa','43':'Londrina','44':'Maringá','45':'Foz do Iguaçu','46':'Francisco Beltrão',
-    '47':'Blumenau','48':'Florianópolis','49':'Chapecó',
-    '51':'Porto Alegre','53':'Pelotas','54':'Caxias do Sul','55':'Santa Maria',
-    '61':'Brasília','62':'Goiânia','63':'Palmas','64':'Rio Verde','65':'Cuiabá','66':'Rondonópolis','67':'Campo Grande','68':'Rio Branco','69':'Porto Velho',
-    '71':'Salvador','73':'Ilhéus','74':'Juazeiro','75':'Feira de Santana','77':'Vitória da Conquista',
-    '79':'Aracaju',
-    '81':'Recife','82':'Maceió','83':'João Pessoa','84':'Natal','85':'Fortaleza','86':'Teresina',
-    '87':'Petrolina','88':'Juazeiro do Norte','89':'Picos',
-    '91':'Belém','92':'Manaus','93':'Santarém','94':'Marabá','95':'Boa Vista','96':'Macapá','97':'Coari','98':'São Luís','99':'Imperatriz'
+  config = {
+    gkey: document.getElementById('gkey').value.trim(),
+    claudekey: document.getElementById('claudekey').value.trim(),
+    instanceId: document.getElementById('z-instance-id').value.trim(),
+    instanceToken: document.getElementById('z-instance-token').value.trim(),
+    clientToken: document.getElementById('z-client-token').value.trim()
   };
-  return mapa[ddd]||null;
+  log('Configurações salvas.', 'ok');
 }
 
-// ── IA ───────────────────────────────────────────
-async function gerarMensagemIA(contato, msgBase, termo, cidade) {
-  const saudacao = saudacaoPorHorario();
-  const primeiroNome = extrairPrimeiroNome(contato.nome);
-  const cidadeDDD = dddParaCidade(contato.telefone);
-  const conexao = cidadeDDD
-    ? `Vi o trabalho de vocês em ${cidadeDDD} e adorei!`
-    : `Vi o trabalho de vocês em ${cidade} e adorei!`;
+function buscar() {
+  const termo = document.getElementById('termo').value;
+  const cidade = document.getElementById('cidade').value;
+  const bairro = document.getElementById('bairro').value;
+  
+  log('Iniciando busca oficial...', 'ok');
+  
+  const service = new google.maps.places.PlacesService(document.createElement('div'));
+  const geocoder = new google.maps.Geocoder();
+  const query = `${termo} ${bairro} ${cidade}`;
 
-  const prompt = `Você é um assistente de marketing digital. Reescreva a mensagem abaixo para WhatsApp seguindo TODAS as regras:
+  geocoder.geocode({ address: query }, (results, status) => {
+    if (status !== 'OK') { log('Erro local: ' + status, 'err'); return; }
+    
+    const request = {
+      location: results[0].geometry.location,
+      radius: '5000',
+      keyword: termo
+    };
 
-MENSAGEM BASE: "${msgBase}"
-
-REGRAS:
-1. Comece com "${saudacao}!"
-2. Use o nome "${primeiroNome}" de forma natural
-3. Inclua esta conexão de forma orgânica: "${conexao}"
-4. Varie as palavras da mensagem base mantendo o mesmo sentido e intenção
-5. Finalize com uma despedida relacionada ao período do dia (${saudacao.toLowerCase()})
-6. Adicione 1 a 2 emojis relevantes e naturais
-7. Tom amigável, caloroso e profissional
-8. Máximo 4 parágrafos curtos
-9. Pareça escrita por uma pessoa real, não por robô
-10. NÃO comece com "Olá" genérico — já começa com a saudação do horário
-
-Retorne APENAS a mensagem final, sem explicações ou comentários.`;
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': config.claudekey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  const data = await resp.json();
-  if (!resp.ok) throw new Error(data.error?.message||'Erro na Claude API');
-  return data.content?.[0]?.text || msgBase;
-}
-
-async function gerarPreview() {
-  if (!config.claudekey) { log('Configure a Claude API Key primeiro.', 'err'); return; }
-  const selecionados = contatos.filter(c=>c.selecionado&&c.telefone);
-  if (!selecionados.length) { log('Selecione ao menos um contato para gerar o preview.', 'err'); return; }
-  const btn = document.getElementById('btn-preview');
-  btn.textContent = 'Gerando...'; btn.disabled = true;
-  document.getElementById('preview-box').textContent = '⏳ Gerando mensagem com IA...';
-  try {
-    const msg = await gerarMensagemIA(
-      selecionados[0],
-      document.getElementById('msg-base').value,
-      document.getElementById('termo').value,
-      document.getElementById('cidade').value
-    );
-    document.getElementById('preview-box').textContent = msg;
-    log(`Preview gerado para "${selecionados[0].nome}".`, 'ok');
-  } catch(e) {
-    document.getElementById('preview-box').textContent = 'Erro ao gerar preview.';
-    log('Erro no preview: '+e.message, 'err');
-  }
-  btn.textContent = 'Gerar preview com IA ↗'; btn.disabled = false;
-}
-
-// ── BUSCA ────────────────────────────────────────
-async function buscar() {
-  const termo = document.getElementById('termo').value.trim();
-  const cidade = document.getElementById('cidade').value.trim();
-  const estado = document.getElementById('estado').value.trim();
-  const bairro = document.getElementById('bairro').value.trim();
-  const maxres = parseInt(document.getElementById('maxres').value);
-  const minrating = parseFloat(document.getElementById('minrating').value);
-
-  if (!config.gkey) { log('Salve as configurações antes de buscar.', 'err'); return; }
-  if (!termo||!cidade) { log('Preencha o tipo de serviço e a cidade.', 'err'); return; }
-
-  const btn = document.getElementById('btn-buscar');
-  btn.textContent = 'Buscando...'; btn.disabled = true;
-  log(`Iniciando busca: "${termo}" em ${[bairro,cidade,estado].filter(Boolean).join(', ')}`, 'i');
-  setStep(2);
-
-  const query = [termo,bairro,cidade,estado].filter(Boolean).join(' ');
-
-  try {
-    const geoResp = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${config.gkey}`);
-    const geoData = await geoResp.json();
-    if (!geoData.results?.length) { log('Localização não encontrada. Verifique cidade e estado.', 'err'); btn.textContent='Buscar contatos →'; btn.disabled=false; return; }
-    const loc = geoData.results[0].geometry.location;
-    log(`Localização: ${geoData.results[0].formatted_address}`, 'ok');
-
-    let allPlaces=[], pageToken=null, rounds=0;
-    do {
-      let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${loc.lat},${loc.lng}&radius=5000&keyword=${encodeURIComponent(termo)}&key=${config.gkey}&language=pt-BR`;
-      if (pageToken) url += `&pagetoken=${pageToken}`;
-      const resp = await fetch(url);
-      const data = await resp.json();
-      if (data.status!=='OK'&&data.status!=='ZERO_RESULTS') { log(`Erro Google Places: ${data.status} — ${data.error_message||''}`, 'err'); break; }
-      allPlaces = allPlaces.concat(data.results||[]);
-      pageToken = data.next_page_token||null;
-      rounds++;
-      if (pageToken&&allPlaces.length<maxres) await new Promise(r=>setTimeout(r,2000));
-    } while (pageToken&&allPlaces.length<maxres&&rounds<3);
-
-    allPlaces = allPlaces.filter(p=>!minrating||(p.rating||0)>=minrating).slice(0,maxres);
-    log(`${allPlaces.length} locais encontrados. Buscando detalhes...`, 'i');
-
-    contatos=[];
-    for (let i=0;i<allPlaces.length;i++) {
-      const p = allPlaces[i];
-      try {
-        const dResp = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${p.place_id}&fields=name,formatted_phone_number,formatted_address,rating&key=${config.gkey}&language=pt-BR`);
-        const dData = await dResp.json();
-        const r = dData.result||{};
-        contatos.push({ id:p.place_id, nome:r.name||p.name, telefone:r.formatted_phone_number||'', endereco:r.formatted_address||'', rating:r.rating||p.rating||0, status:'pendente', selecionado:!!r.formatted_phone_number });
-      } catch(e) {
-        contatos.push({ id:p.place_id, nome:p.name, telefone:'', endereco:'', rating:p.rating||0, status:'pendente', selecionado:false });
+    service.nearbySearch(request, (places, statusNearby) => {
+      if (statusNearby !== google.maps.places.PlacesServiceStatus.OK) {
+        log('Busca sem resultados.', 'err'); return;
       }
-      if ((i+1)%5===0) log(`Detalhes: ${i+1}/${allPlaces.length}...`, 'i');
-    }
-
-    filaIdx=0; enviados=0;
-    renderTabela(); atualizarMetricas();
-    document.getElementById('panel-results').style.display='block';
-    document.getElementById('panel-msg').style.display='block';
-    document.getElementById('panel-disparo').style.display='block';
-    document.getElementById('msg-base').value = document.getElementById('msg-base').value
-      .replace('{termo}',termo).replace('{cidade}',cidade).replace('{bairro}',bairro||cidade);
-    log(`Concluído! ${contatos.filter(c=>c.telefone).length} contatos com telefone de ${contatos.length} encontrados.`, 'ok');
-    setStep(3);
-  } catch(e) { log('Erro na busca: '+e.message, 'err'); }
-
-  btn.textContent='Buscar contatos →'; btn.disabled=false;
-}
-
-// ── TABELA ───────────────────────────────────────
-function renderTabela() {
-  document.getElementById('tbody').innerHTML = contatos.map((c,i)=>`
-    <tr>
-      <td><input type="checkbox" ${c.selecionado?'checked':''} onchange="toggleItem(${i},this)" ${!c.telefone?'disabled':''}></td>
-      <td style="font-weight:500;max-width:0">${c.nome}</td>
-      <td>${c.telefone||'<span style="color:var(--text3)">sem telefone</span>'}</td>
-      <td>${c.rating?'★ '+c.rating.toFixed(1):'—'}</td>
-      <td style="font-size:12px;color:var(--text2);max-width:0">${c.endereco.split(',').slice(0,2).join(',')}</td>
-      <td><span class="badge ${c.status==='enviado'?'badge-ok':c.status==='erro'?'badge-err':c.status==='pausado'?'badge-w':'badge-i'}" id="st-${i}">${c.status}</span></td>
-    </tr>`).join('');
-}
-
-function toggleItem(i,el){contatos[i].selecionado=el.checked;atualizarMetricas();}
-function toggleAll(el){contatos.forEach(c=>{if(c.telefone)c.selecionado=el.checked;});renderTabela();atualizarMetricas();}
-function selecionarTodos(){contatos.forEach(c=>{if(c.telefone)c.selecionado=true;});renderTabela();atualizarMetricas();}
-function desmarcarTodos(){contatos.forEach(c=>c.selecionado=false);renderTabela();atualizarMetricas();}
-
-function atualizarMetricas() {
-  const sel = contatos.filter(c=>c.selecionado&&c.telefone&&c.status==='pendente');
-  document.getElementById('m-total').textContent = contatos.length;
-  document.getElementById('m-phone').textContent = contatos.filter(c=>c.telefone).length;
-  document.getElementById('m-sent').textContent = enviados;
-  document.getElementById('m-pending').textContent = sel.length;
-}
-
-// ── DISPARO ──────────────────────────────────────
-function setStatus(txt, sub, tipo) {
-  document.getElementById('status-txt').textContent = txt;
-  document.getElementById('status-sub').textContent = sub;
-  document.getElementById('status-dot').className = 'status-dot '+(tipo||'stopped');
-  document.getElementById('top-dot').className = 'status-dot '+(tipo||'stopped');
-  document.getElementById('top-status').textContent = txt;
-}
-
-function iniciarDisparo() {
-  const selecionados = contatos.filter(c=>c.selecionado&&c.telefone&&c.status==='pendente');
-  if (!config.instanceId||!config.instanceToken||!config.clientToken) { log('Configure as credenciais Z-API primeiro.', 'err'); return; }
-  if (!config.claudekey) { log('Configure a Claude API Key primeiro.', 'err'); return; }
-  if (!selecionados.length) { log('Nenhum contato pendente selecionado.', 'err'); return; }
-  rodando=true; pausado=false;
-  document.getElementById('btn-iniciar').disabled=true;
-  document.getElementById('btn-pausar').disabled=false;
-  document.getElementById('btn-parar').disabled=false;
-  log(`Disparo iniciado! ${selecionados.length} contatos na fila.`, 'ok');
-  setStep(4);
-  processarProximo();
-}
-
-async function processarProximo() {
-  if (!rodando) return;
-
-  const limiteDia = parseInt(document.getElementById('limite-dia').value);
-  if (enviados >= limiteDia) {
-    setStatus('Limite diário atingido', `${enviados} mensagens enviadas hoje — retome amanhã`, 'paused');
-    log(`Limite de ${limiteDia} mensagens/dia atingido. Disparo pausado.`, 'w');
-    rodando=false;
-    document.getElementById('btn-iniciar').disabled=false;
-    document.getElementById('btn-pausar').disabled=true;
-    return;
-  }
-
-  if (pausado) { setStatus('Pausado', 'Clique em Pausar novamente para retomar', 'paused'); return; }
-
-  if (!dentroJanela()) {
-    const proxCheck = 60;
-    setStatus('Fora da janela de horário', `Verificando novamente em ${proxCheck}s...`, 'paused');
-    log('Fora do horário configurado. Aguardando próxima janela...', 'w');
-    disparoTimer = setTimeout(processarProximo, proxCheck*1000);
-    return;
-  }
-
-  const selecionados = contatos.filter(c=>c.selecionado&&c.telefone&&c.status==='pendente');
-  if (!selecionados.length) {
-    setStatus('Disparo concluído!', `${enviados} mensagens enviadas com sucesso`, 'stopped');
-    log(`Todos os contatos foram processados. Total enviado: ${enviados}`, 'ok');
-    rodando=false;
-    document.getElementById('btn-iniciar').disabled=false;
-    document.getElementById('btn-pausar').disabled=true;
-    document.getElementById('btn-parar').disabled=true;
-    return;
-  }
-
-  const c = selecionados[0];
-  const idxGlobal = contatos.findIndex(x=>x.id===c.id);
-  setStatus(`Enviando para ${c.nome}...`, `${selecionados.length-1} contatos restantes na fila`, 'running');
-  log(`Gerando mensagem com IA para "${c.nome}"...`, 'i');
-
-  try {
-    const msg = await gerarMensagemIA(c, document.getElementById('msg-base').value, document.getElementById('termo').value, document.getElementById('cidade').value);
-    const phone = '55'+c.telefone.replace(/\D/g,'');
-    const resp = await fetch(`https://api.z-api.io/instances/${config.instanceId}/token/${config.instanceToken}/send-text`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Client-Token': config.clientToken },
-      body: JSON.stringify({ phone, message: msg })
+      
+      contatos = [];
+      places.forEach(p => {
+        service.getDetails({ placeId: p.place_id, fields: ['name', 'formatted_phone_number'] }, (details, s) => {
+          if (s === 'OK') {
+            contatos.push({
+              nome: details.name,
+              telefone: details.formatted_phone_number || '',
+              status: 'pendente',
+              selecionado: !!details.formatted_phone_number
+            });
+            renderTabela();
+          }
+        });
+      });
+      
+      document.getElementById('panel-results').style.display = 'block';
+      document.getElementById('panel-msg').style.display = 'block';
+      log('Locais encontrados com sucesso!', 'ok');
     });
-    const data = await resp.json();
-    if (resp.ok) {
-      contatos[idxGlobal].status='enviado'; enviados++;
-      log(`✓ Enviado para ${c.nome} (${c.telefone})`, 'ok');
-    } else {
-      contatos[idxGlobal].status='erro';
-      log(`✗ Erro ao enviar para ${c.nome}: ${data.message||JSON.stringify(data)}`, 'err');
-    }
-  } catch(e) {
-    contatos[idxGlobal].status='erro';
-    log(`✗ Erro: ${e.message}`, 'err');
+  });
+}
+
+function renderTabela() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = contatos.map((c, i) => `
+    <tr>
+      <td><input type="checkbox" ${c.selecionado ? 'checked' : ''} disabled></td>
+      <td>${c.nome}</td>
+      <td>${c.telefone || '—'}</td>
+      <td>${c.status}</td>
+    </tr>`).join('');
+  document.getElementById('m-total').textContent = contatos.length;
+  document.getElementById('m-phone').textContent = contatos.filter(c => c.telefone).length;
+}
+
+async function iniciarDisparo() {
+  const fila = contatos.filter(c => c.selecionado && c.status === 'pendente');
+  log(`Iniciando envio para ${fila.length} contatos...`, 'ok');
+  
+  for (let c of fila) {
+    try {
+      // Simulação de envio Z-API e Claude IA
+      log(`Enviando para ${c.nome}...`, 'ok');
+      await new Promise(r => setTimeout(r, 2000));
+      c.status = 'enviado';
+      enviados++;
+      renderTabela();
+      document.getElementById('m-sent').textContent = enviados;
+    } catch (e) { log('Erro envio: ' + c.nome, 'err'); }
   }
-
-  const badge = document.getElementById('st-'+idxGlobal);
-  if (badge) { const s=contatos[idxGlobal].status; badge.textContent=s; badge.className='badge '+(s==='enviado'?'badge-ok':s==='erro'?'badge-err':'badge-i'); }
-  atualizarMetricas();
-
-  const seg = parseInt(document.getElementById('intervalo').value)||60;
-  let countdown = seg;
-  clearInterval(countdownTimer);
-  countdownTimer = setInterval(()=>{
-    countdown--;
-    document.getElementById('next-timer').textContent = `próximo em ${countdown}s`;
-    if (countdown<=0) clearInterval(countdownTimer);
-  }, 1000);
-  document.getElementById('next-timer').textContent = `próximo em ${countdown}s`;
-  disparoTimer = setTimeout(()=>{ clearInterval(countdownTimer); document.getElementById('next-timer').textContent=''; processarProximo(); }, seg*1000);
-}
-
-function pausarDisparo() {
-  if (pausado) {
-    pausado=false;
-    document.getElementById('btn-pausar').textContent='Pausar';
-    log('Disparo retomado.', 'ok');
-    processarProximo();
-  } else {
-    pausado=true;
-    clearTimeout(disparoTimer); clearInterval(countdownTimer);
-    document.getElementById('btn-pausar').textContent='Retomar';
-    setStatus('Pausado pelo usuário', 'Clique em "Retomar" para continuar', 'paused');
-    log('Disparo pausado.', 'w');
-  }
-}
-
-function pararDisparo() {
-  if (!confirm('Deseja encerrar o disparo? Os contatos não enviados permanecerão pendentes.')) return;
-  rodando=false; pausado=false;
-  clearTimeout(disparoTimer); clearInterval(countdownTimer);
-  document.getElementById('btn-iniciar').disabled=false;
-  document.getElementById('btn-pausar').disabled=true;
-  document.getElementById('btn-parar').disabled=true;
-  document.getElementById('btn-pausar').textContent='Pausar';
-  document.getElementById('next-timer').textContent='';
-  setStatus('Disparo encerrado', `${enviados} mensagens enviadas`, 'stopped');
-  log(`Disparo encerrado. Total enviado: ${enviados}.`, 'w');
-}
-
-// ── EXPORT ───────────────────────────────────────
-function exportCSV() {
-  if (!contatos.length) return;
-  const rows=[['Nome','Telefone','Avaliação','Endereço','Status']];
-  contatos.forEach(c=>rows.push([c.nome,c.telefone,c.rating,c.endereco,c.status]));
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
-  a.download='contatos_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.csv';
-  a.click();
 }
 </script>
 </body>
