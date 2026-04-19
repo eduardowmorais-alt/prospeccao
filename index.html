@@ -6,154 +6,248 @@
 <title>Buscador de Contatos — Disparo WhatsApp</title>
 <style>
   :root {
-    --bg: #f9f9f8; --bg2: #f0efea; --bg3: #e8e7e2; --card: #ffffff;
-    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
-    --text: #1a1a1a; --text2: #6b6b68; --text3: #9b9b98;
-    --info-bg: #e6f1fb; --info-text: #0c447c;
-    --success-bg: #eaf3de; --success-text: #27500a;
-    --warning-bg: #faeeda; --warning-text: #633806;
-    --danger-bg: #fcebeb; --danger-text: #791f1f;
-    --radius: 8px; --radius-lg: 12px;
+    --bg: #f9f9f8;
+    --bg2: #f0efea;
+    --bg3: #e8e7e2;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.22);
+    --text: #1a1a1a;
+    --text2: #6b6b68;
+    --text3: #9b9b98;
+    --info-bg: #e6f1fb;
+    --info-text: #0c447c;
+    --success-bg: #eaf3de;
+    --success-text: #27500a;
+    --warning-bg: #faeeda;
+    --warning-text: #633806;
+    --danger-bg: #fcebeb;
+    --danger-text: #791f1f;
+    --radius: 8px;
+    --radius-lg: 12px;
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --mono: 'SF Mono', 'Fira Code', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
   
-  .topbar { background: var(--card); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 12px; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .topbar-logo { font-size: 16px; font-weight: 600; color: var(--text); }
-  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
-  .status-dot.running { background: #22c55e; }
+  .topbar {
+    background: var(--card);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-logo { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+  .topbar-sub { font-size: 13px; color: var(--text2); font-weight: 400; }
+  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); padding: 4px 12px; background: var(--bg2); border-radius: 20px; border: 0.5px solid var(--border); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); position: relative; }
+  .status-dot::after { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border-radius: 50%; border: 2px solid currentColor; opacity: 0.2; display: none; }
+  .status-dot.running { background: #22c55e; color: #22c55e; }
+  .status-dot.running::after { display: block; animation: pulse 2s infinite; }
   .status-dot.paused { background: #f59e0b; }
+  
+  @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2.5); opacity: 0; } }
 
   .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
-  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
-  
-  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
-  input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; outline: none; background: var(--card); }
-  
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  .field { margin-bottom: 14px; }
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 6px; font-weight: 500; }
   
-  button { padding: 9px 18px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--card); color: var(--text); font-size: 14px; cursor: pointer; font-weight: 500; transition: 0.15s; }
+  input[type=text], input[type=password], input[type=number], input[type=time], select, textarea {
+    width: 100%; padding: 10px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
+    outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--text); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+
+  button {
+    padding: 10px 20px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
+    cursor: pointer; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  button:hover:not(:disabled) { background: var(--bg2); border-color: var(--text); }
   button.primary { background: var(--text); color: #fff; border-color: var(--text); }
+  button.primary:hover:not(:disabled) { background: #333; }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
-  .chip { display: inline-flex; align-items: center; font-size: 13px; padding: 5px 13px; border-radius: 20px; cursor: pointer; border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text2); }
-  .chip.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; font-weight: 500; }
-
   .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
-  .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
-  .metric-n { font-size: 28px; font-weight: 600; color: var(--text); }
-  .metric-l { font-size: 12px; color: var(--text2); }
+  .metric { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
+  .metric-n { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .metric-l { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { padding: 10px; border-bottom: 0.5px solid var(--border); text-align: left; }
+  .table-container { border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--card); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  th { background: var(--bg); font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 10px 12px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
+  td { padding: 12px; border-bottom: 0.5px solid var(--border); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  tr:last-child td { border-bottom: none; }
+  
+  .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-pending { background: var(--warning-bg); color: var(--warning-text); }
+  .badge-sent { background: var(--success-bg); color: var(--success-text); }
+  .badge-error { background: var(--danger-bg); color: var(--danger-text); }
 
-  #log-box { font-family: var(--mono); font-size: 12px; background: #1a1a1a; color: #ccc; border-radius: var(--radius); padding: 14px; max-height: 200px; overflow-y: auto; margin-top: 20px; }
+  #log-box {
+    font-family: var(--mono); font-size: 12px; background: #000; color: #fff;
+    border-radius: var(--radius); padding: 1rem; max-height: 240px; overflow-y: auto; margin-top: 1.25rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); line-height: 1.5;
+  }
+  .log-line { margin-bottom: 4px; display: flex; gap: 8px; }
+  .log-ts { color: #555; flex-shrink: 0; }
+  .log-msg-i { color: #3b82f6; }
+  .log-msg-ok { color: #22c55e; }
+  .log-msg-w { color: #f59e0b; }
+  .log-msg-err { color: #ef4444; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--border2);
+    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; background: var(--card); color: var(--text2);
+  }
+  .chip.on { background: var(--text); color: #fff; border-color: var(--text); }
+
+  #next-timer { font-size: 12px; font-weight: 600; color: var(--info-text); background: var(--info-bg); padding: 4px 12px; border-radius: 12px; display: inline-block; margin-top: 8px; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">Minha Manicure — Prospecção Inteligente</div>
+  <div class="topbar-logo">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+    Minha Manicure
+  </div>
+  <div class="topbar-sub">Prospecção v1.0</div>
   <div class="topbar-status"><div class="status-dot" id="top-dot"></div><span id="top-status">Aguardando</span></div>
 </div>
 
 <div class="container">
   <div class="card">
-    <div class="card-title">1. Configurações de API</div>
+    <div class="card-title">1. Autenticação e APIs</div>
     <div class="grid2">
-      <div><label>Claude API Key</label><input type="password" id="claudekey"></div>
-      <div><label>Google Maps Key</label><input type="password" id="gkey"></div>
+      <div class="field"><label>Claude API Key</label><input type="password" id="claudekey" placeholder="sk-ant-..."></div>
+      <div class="field"><label>Google Maps Key</label><input type="password" id="gkey" placeholder="AIzaSy..."></div>
     </div>
-    <div class="grid3" style="margin-top:14px">
-      <div><label>Z-API ID</label><input type="text" id="z-id"></div>
-      <div><label>Instance Token</label><input type="password" id="z-token"></div>
-      <div><label>Client Token</label><input type="password" id="z-client"></div>
+    <div class="grid3">
+      <div class="field"><label>Z-API ID</label><input type="text" id="zid"></div>
+      <div class="field"><label>Instance Token</label><input type="password" id="ztoken"></div>
+      <div class="field"><label>Client Token</label><input type="password" id="zclient"></div>
     </div>
-    <button class="primary" style="width:100%; margin-top:14px" onclick="saveConfig()">Salvar Configurações</button>
+    <button class="primary" style="width:100%" onclick="saveConfig()">Salvar Configurações</button>
   </div>
 
   <div class="card">
     <div class="card-title">2. Critérios de Busca</div>
     <div class="grid2">
-      <div><label>O que buscar?</label><input type="text" id="termo" value="Manicure"></div>
-      <div><label>Bairro</label><input type="text" id="bairro" placeholder="Ex: Aldeota"></div>
+      <div class="field"><label>O que buscar?</label><input type="text" id="termo" value="Manicure"></div>
+      <div class="field"><label>Bairro</label><input type="text" id="bairro" placeholder="Ex: Aldeota"></div>
     </div>
-    <div class="grid2" style="margin-top:14px">
-      <div><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
-      <div><label>Estado (UF)</label><input type="text" id="estado" value="CE"></div>
+    <div class="grid2">
+      <div class="field"><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
+      <div class="field"><label>Estado (UF)</label><input type="text" id="estado" value="CE"></div>
     </div>
-    <button class="primary" style="width:100%; margin-top:14px" onclick="executarBusca()">Buscar Profissionais</button>
+    <button class="primary" style="width:100%" onclick="executarBusca()" id="btn-busca">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      Buscar Profissionais
+    </button>
   </div>
 
   <div class="metrics">
-    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">Encontrados</div></div>
-    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">Com Zap</div></div>
+    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">Total</div></div>
+    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">C/ Zap</div></div>
     <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">Enviados</div></div>
     <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">Pendentes</div></div>
   </div>
 
   <div class="card" id="panel-results" style="display:none">
-    <div class="card-title">3. Resultados da Busca <button onclick="exportCSV()" style="margin-left:auto; font-size:11px">Exportar CSV</button></div>
-    <div style="max-height:300px; overflow-y:auto">
-      <table>
-        <thead><tr><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
+    <div class="card-title" style="margin-bottom:1rem">
+      3. Resultados
+      <button onclick="exportCSV()" style="margin-left:auto; font-size:11px; padding:4px 10px">Exportar CSV</button>
+    </div>
+    <div class="table-container">
+      <table id="table-contatos">
+        <thead>
+          <tr>
+            <th style="width:40px; text-align:center"><input type="checkbox" checked onclick="toggleAll(this)"></th>
+            <th>Nome</th>
+            <th style="width:140px">Telefone</th>
+            <th style="width:100px">Status</th>
+          </tr>
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
 
   <div class="card" id="panel-disparo" style="display:none">
-    <div class="card-title">4. Configuração de Disparo</div>
-    <label>Mensagem Base</label>
-    <textarea id="msg-base" rows="3">Olá {nome}, vi seu trabalho em {cidade} e achei incrível!</textarea>
+    <div class="card-title">4. Sequência de Envio</div>
+    <div class="field">
+      <label>Mensagem Base (Use {nome} e {cidade})</label>
+      <textarea id="msg-base" rows="3">Olá {nome}, tudo bem? Vi seu trabalho como manicure em {cidade} e gostaria de apresentar o app Minha Manicure.</textarea>
+    </div>
     
-    <div class="grid3" style="margin-top:14px">
-      <div><label>Intervalo (s)</label><input type="number" id="intervalo" value="60"></div>
-      <div><label>Início</label><input type="time" id="h-ini" value="08:00"></div>
-      <div><label>Fim</label><input type="time" id="h-fim" value="20:00"></div>
+    <div class="grid3">
+      <div class="field"><label>Intervalo (seg)</label><input type="number" id="intervalo" value="60"></div>
+      <div class="field"><label>Janela: Início</label><input type="time" id="h-ini" value="08:00"></div>
+      <div class="field"><label>Janela: Fim</label><input type="time" id="h-fim" value="19:00"></div>
     </div>
 
-    <div class="chips" id="dias">
-      <div class="chip on" onclick="this.classList.toggle('on')">Seg</div>
-      <div class="chip on" onclick="this.classList.toggle('on')">Ter</div>
-      <div class="chip on" onclick="this.classList.toggle('on')">Qua</div>
-      <div class="chip on" onclick="this.classList.toggle('on')">Qui</div>
-      <div class="chip on" onclick="this.classList.toggle('on')">Sex</div>
-      <div class="chip on" onclick="this.classList.toggle('on')">Sab</div>
-      <div class="chip" onclick="this.classList.toggle('on')">Dom</div>
+    <div class="field">
+      <label>Dias Permitidos</label>
+      <div class="chips" id="dias-lista">
+        <div class="chip on" data-dia="1">Seg</div>
+        <div class="chip on" data-dia="2">Ter</div>
+        <div class="chip on" data-dia="3">Qua</div>
+        <div class="chip on" data-dia="4">Qui</div>
+        <div class="chip on" data-dia="5">Sex</div>
+        <div class="chip on" data-dia="6">Sab</div>
+        <div class="chip" data-dia="0">Dom</div>
+      </div>
     </div>
 
-    <div class="grid3" style="margin-top:20px">
-      <button class="primary" onclick="iniciarEnvio()" id="btn-iniciar">Iniciar</button>
+    <div class="grid3" style="margin-top:10px">
+      <button class="primary" onclick="iniciarSequencia()" id="btn-iniciar">Iniciar</button>
       <button onclick="pausarDisparo()" id="btn-pausar" disabled>Pausar</button>
       <button onclick="pararDisparo()" id="btn-parar" disabled>Parar</button>
     </div>
-    <div id="next-timer" style="font-size:12px; color:var(--text2); margin-top:10px; text-align:center"></div>
+    <div style="text-align:center"><div id="next-timer" style="display:none"></div></div>
   </div>
 
-  <div id="log-box">Aguardando...</div>
+  <div id="log-box"></div>
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=COLOQUE_SUA_CHAVE_AQUI&libraries=places"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbSmfsgUVtmR9FbDIdMeX4lePOl138GXQ
+&libraries=places"></script>
 
 <script>
 let contatos = [], enviados = 0, rodando = false, pausado = false;
 let disparoTimer, countdownTimer, config = {};
 
-function log(m, t) {
-  const lb = document.getElementById('log-box');
-  lb.innerHTML += `<div style="color:${t=='err'?'#fca5a5':t=='ok'?'#86efac':'#adadad'}">[${new Date().toLocaleTimeString()}] ${m}</div>`;
-  lb.scrollTop = lb.scrollHeight;
+// Inicialização dos chips de dias
+document.querySelectorAll('.chip').forEach(c => {
+  c.onclick = () => c.classList.toggle('on');
+});
+
+function log(msg, tipo) {
+  const box = document.getElementById('log-box');
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-ts">${new Date().toLocaleTimeString()}</span><span class="log-msg-${tipo}">${msg}</span>`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
 }
 
-function setStatus(txt, sub, css) {
+function setStatus(txt, css) {
   document.getElementById('top-status').textContent = txt;
   document.getElementById('top-dot').className = 'status-dot ' + css;
 }
@@ -161,11 +255,11 @@ function setStatus(txt, sub, css) {
 function saveConfig() {
   config = {
     claudekey: document.getElementById('claudekey').value,
-    zid: document.getElementById('z-id').value,
-    ztoken: document.getElementById('z-token').value,
-    zclient: document.getElementById('z-client').value
+    zid: document.getElementById('zid').value,
+    ztoken: document.getElementById('ztoken').value,
+    zclient: document.getElementById('zclient').value
   };
-  log("Configurações salvas!", "ok");
+  log("Configurações salvas localmente.", "ok");
 }
 
 function executarBusca() {
@@ -173,90 +267,155 @@ function executarBusca() {
   const bairro = document.getElementById('bairro').value;
   const cidade = document.getElementById('cidade').value;
   const estado = document.getElementById('estado').value;
-  const local = `${bairro} ${cidade} ${estado}`;
+  const local = `${bairro} ${cidade} ${estado}`.trim();
   
-  log(`Buscando ${termo} em ${local}...`, "ok");
+  if(!termo || !cidade) { log("Preencha o serviço e a cidade.", "err"); return; }
+  
+  log(`Geolocalizando: ${local}...`, "i");
   const service = new google.maps.places.PlacesService(document.createElement('div'));
   const geocoder = new google.maps.Geocoder();
 
   geocoder.geocode({ address: local }, (results, status) => {
-    if (status !== 'OK') { log("Erro localização: " + status, "err"); return; }
+    if (status !== 'OK') { log("Erro no endereço: " + status, "err"); return; }
     
-    const request = { location: results[0].geometry.location, radius: '5000', keyword: termo };
+    log("Iniciando varredura no Google Places...", "i");
+    const request = {
+      location: results[0].geometry.location,
+      radius: '5000',
+      keyword: termo
+    };
 
     service.nearbySearch(request, (places, statusNearby) => {
-      if (statusNearby !== 'OK') { log("Sem resultados.", "err"); return; }
+      if (statusNearby !== 'OK') { log("Nenhum local encontrado.", "err"); return; }
       
       contatos = [];
+      let count = 0;
       places.forEach(p => {
         service.getDetails({ placeId: p.place_id, fields: ['name', 'formatted_phone_number', 'rating', 'vicinity'] }, (details, s) => {
           if (s === 'OK') {
             contatos.push({
+              id: p.place_id,
               nome: details.name,
-              fone: details.formatted_phone_number || '',
+              telefone: details.formatted_phone_number || '',
               rating: details.rating || 0,
               endereco: details.vicinity || '',
-              status: details.formatted_phone_number ? 'Pendente' : 'Sem WhatsApp'
+              status: details.formatted_phone_number ? 'Pendente' : 'Sem WhatsApp',
+              selecionado: !!details.formatted_phone_number
             });
-            atualizarTabela();
+            count++;
+            if(count === places.length) {
+              renderTabela();
+              document.getElementById('panel-results').style.display = 'block';
+              document.getElementById('panel-disparo').style.display = 'block';
+              log(`Busca concluída. ${contatos.length} resultados processados.`, "ok");
+            }
           }
         });
       });
-      document.getElementById('panel-results').style.display = 'block';
-      document.getElementById('panel-disparo').style.display = 'block';
     });
   });
 }
 
-function atualizarTabela() {
-  const tb = document.getElementById('tbody');
-  tb.innerHTML = contatos.map(c => `<tr><td>${c.nome}</td><td>${c.fone || '—'}</td><td>${c.status}</td></tr>`).join('');
-  document.getElementById('m-total').textContent = contatos.length;
-  document.getElementById('m-phone').textContent = contatos.filter(c => c.fone).length;
-  document.getElementById('m-pending').textContent = contatos.filter(c => c.status == 'Pendente').length;
-  document.getElementById('m-sent').textContent = enviados;
+function renderTabela() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = contatos.map((c, i) => `
+    <tr>
+      <td style="text-align:center"><input type="checkbox" ${c.selecionado ? 'checked' : ''} onchange="contatos[${i}].selecionado = this.checked; updateMetrics()"></td>
+      <td>${c.nome}</td>
+      <td>${c.telefone || '—'}</td>
+      <td><span class="badge badge-${c.status === 'Enviado' ? 'sent' : c.status === 'Erro' ? 'error' : 'pending'}">${c.status}</span></td>
+    </tr>
+  `).join('');
+  updateMetrics();
 }
 
-async function iniciarEnvio() {
+function updateMetrics() {
+  document.getElementById('m-total').textContent = contatos.length;
+  document.getElementById('m-phone').textContent = contatos.filter(c => c.telefone).length;
+  document.getElementById('m-sent').textContent = enviados;
+  document.getElementById('m-pending').textContent = contatos.filter(c => c.selecionado && c.status === 'Pendente').length;
+}
+
+function toggleAll(el) {
+  contatos.forEach(c => { if(c.telefone) c.selecionado = el.checked; });
+  renderTabela();
+}
+
+async function iniciarSequencia() {
   if (rodando && !pausado) return;
+  
+  const fila = contatos.filter(c => c.selecionado && c.status === 'Pendente');
+  if (fila.length === 0) { log("Nenhum contato pendente selecionado.", "w"); return; }
+
   rodando = true; pausado = false;
   document.getElementById('btn-iniciar').disabled = true;
   document.getElementById('btn-pausar').disabled = false;
   document.getElementById('btn-parar').disabled = false;
   document.getElementById('btn-pausar').textContent = 'Pausar';
-  setStatus('Rodando', 'Enviando mensagens...', 'running');
+  setStatus('Rodando', 'running');
+  
   processarFila();
 }
 
 async function processarFila() {
   if (!rodando || pausado) return;
 
-  const proximo = contatos.find(c => c.status === 'Pendente');
+  // Verificar Janela de Horário e Dias
+  const agora = new Date();
+  const hIni = document.getElementById('h-ini').value;
+  const hFim = document.getElementById('h-fim').value;
+  const diasOn = Array.from(document.querySelectorAll('#dias-lista .chip.on')).map(c => parseInt(c.dataset.dia));
+  
+  const horaAtual = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
+  
+  if (!diasOn.includes(agora.getDay()) || horaAtual < hIni || horaAtual > hFim) {
+    log("Fora da janela de horário/dia permitida. Aguardando 1 minuto...", "w");
+    disparoTimer = setTimeout(processarFila, 60000);
+    return;
+  }
+
+  const proximo = contatos.find(c => c.selecionado && c.status === 'Pendente');
+  
   if (!proximo) {
-    log("Fila concluída!", "ok");
+    log("Fila de disparos concluída com sucesso.", "ok");
     pararDisparo();
     return;
   }
 
-  log(`Processando: ${proximo.nome}...`, "ok");
-  // Simulação de envio
-  await new Promise(r => setTimeout(r, 2000));
-  proximo.status = 'Enviado';
-  enviados++;
-  atualizarTabela();
-
-  let seg = parseInt(document.getElementById('intervalo').value);
-  countdown(seg);
-  disparoTimer = setTimeout(processarFila, seg * 1000);
+  try {
+    log(`Enviando para: ${proximo.nome}...`, "i");
+    // Simulação de chamada Claude + Z-API
+    await new Promise(r => setTimeout(r, 2000)); 
+    
+    proximo.status = 'Enviado';
+    enviados++;
+    renderTabela();
+    
+    const seg = parseInt(document.getElementById('intervalo').value);
+    iniciarCountdown(seg);
+    disparoTimer = setTimeout(processarFila, seg * 1000);
+    
+  } catch (err) {
+    log(`Erro ao enviar para ${proximo.nome}: ${err.message}`, "err");
+    proximo.status = 'Erro';
+    renderTabela();
+    disparoTimer = setTimeout(processarFila, 5000);
+  }
 }
 
-function countdown(s) {
+function iniciarCountdown(s) {
+  const el = document.getElementById('next-timer');
+  el.style.display = 'inline-block';
+  let timeLeft = s;
+  
   clearInterval(countdownTimer);
-  const display = document.getElementById('next-timer');
   countdownTimer = setInterval(() => {
-    s--;
-    display.textContent = `Próximo envio em ${s}s`;
-    if (s <= 0) clearInterval(countdownTimer);
+    timeLeft--;
+    el.textContent = `Próximo disparo em ${timeLeft}s`;
+    if (timeLeft <= 0) {
+      clearInterval(countdownTimer);
+      el.style.display = 'none';
+    }
   }, 1000);
 }
 
@@ -266,9 +425,11 @@ function pausarDisparo() {
   if (pausado) {
     clearTimeout(disparoTimer);
     clearInterval(countdownTimer);
-    setStatus('Pausado', 'Aguardando retomada', 'paused');
+    setStatus('Pausado', 'paused');
+    log("Sequência pausada pelo usuário.", "w");
   } else {
-    iniciarEnvio();
+    log("Retomando sequência...", "i");
+    iniciarSequencia();
   }
 }
 
@@ -279,20 +440,22 @@ function pararDisparo() {
   document.getElementById('btn-iniciar').disabled = false;
   document.getElementById('btn-pausar').disabled = true;
   document.getElementById('btn-parar').disabled = true;
-  document.getElementById('next-timer').textContent = '';
-  setStatus('Encerrado', 'Disparo finalizado', '');
+  document.getElementById('next-timer').style.display = 'none';
+  setStatus('Aguardando', '');
+  log("Sequência encerrada.", "w");
 }
 
 function exportCSV() {
-  const rows = [['Nome','Telefone','Status']];
-  contatos.forEach(c => rows.push([c.nome, c.fone, c.status]));
-  const csv = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'contatos.csv';
-  a.click();
+  const rows = [['Nome', 'Telefone', 'Endereço', 'Avaliação', 'Status']];
+  contatos.forEach(c => rows.push([c.nome, c.telefone, c.endereco, c.rating, c.status]));
+  const csvContent = rows.map(e => e.join(",")).join("\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "prospeccao_manicure.csv";
+  link.click();
 }
 </script>
+
 </body>
 </html>
