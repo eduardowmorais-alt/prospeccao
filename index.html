@@ -6,719 +6,219 @@
 <title>Buscador de Contatos — Disparo WhatsApp</title>
 <style>
   :root {
-    --bg: #f9f9f8;
-    --bg2: #f0efea;
-    --bg3: #e8e7e2;
-    --card: #ffffff;
-    --border: rgba(0,0,0,0.12);
-    --border2: rgba(0,0,0,0.22);
-    --text: #1a1a1a;
-    --text2: #6b6b68;
-    --text3: #9b9b98;
-    --info-bg: #e6f1fb;
-    --info-text: #0c447c;
-    --success-bg: #eaf3de;
-    --success-text: #27500a;
-    --warning-bg: #faeeda;
-    --warning-text: #633806;
-    --danger-bg: #fcebeb;
-    --danger-text: #791f1f;
-    --radius: 8px;
-    --radius-lg: 12px;
+    --bg: #f9f9f8; --bg2: #f0efea; --bg3: #e8e7e2; --card: #ffffff;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --text: #1a1a1a; --text2: #6b6b68; --text3: #9b9b98;
+    --info-bg: #e6f1fb; --info-text: #0c447c;
+    --success-bg: #eaf3de; --success-text: #27500a;
+    --warning-bg: #faeeda; --warning-text: #633806;
+    --danger-bg: #fcebeb; --danger-text: #791f1f;
+    --radius: 8px; --radius-lg: 12px;
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --mono: 'SF Mono', 'Fira Code', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
-  
-  .topbar {
-    background: var(--card);
-    border-bottom: 0.5px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .topbar-logo { font-size: 16px; font-weight: 600; color: var(--text); }
-  .topbar-sub { font-size: 13px; color: var(--text2); }
+  .topbar { background: var(--card); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 12px; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .topbar-logo { font-size: 16px; font-weight: 600; }
   .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
   .status-dot.running { background: #22c55e; }
   .status-dot.paused { background: #f59e0b; }
-
   .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-
   .step-bar { display: flex; align-items: center; margin-bottom: 2rem; }
   .step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); }
-  .step.done { color: var(--success-text); }
   .step.active { color: var(--text); font-weight: 500; }
-  .step-dot { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
-  .step.done .step-dot { background: var(--success-bg); color: var(--success-text); border-color: transparent; }
-  .step.active .step-dot { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
+  .step-dot { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; }
   .sep { flex: 1; height: 0.5px; background: var(--border); margin: 0 10px; }
-
   .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
-  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
-  .card-title .tag { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; background: var(--info-bg); color: var(--info-text); }
-
-  .divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
-
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; }
   label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
-  input[type=text], input[type=password], input[type=number], input[type=time], select, textarea {
-    width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius);
-    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
-    outline: none; transition: border-color 0.15s;
-  }
-  input:focus, select:focus, textarea:focus { border-color: #378add; box-shadow: 0 0 0 3px rgba(55,138,221,0.15); }
-  .hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
-
+  input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; outline: none; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-
-  button {
-    padding: 9px 18px; border: 0.5px solid var(--border2); border-radius: var(--radius);
-    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
-    cursor: pointer; transition: all 0.15s; font-weight: 500;
-  }
-  button:hover { background: var(--bg2); }
-  button:active { transform: scale(0.98); }
-  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  button.primary { background: var(--text); color: #fff; border-color: var(--text); }
-  button.primary:hover { background: #333; }
-  button.danger { background: var(--danger-bg); color: var(--danger-text); border-color: transparent; }
-  button.success { background: var(--success-bg); color: var(--success-text); border-color: transparent; }
-
-  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
-  .chip {
-    display: inline-flex; align-items: center; font-size: 13px; padding: 5px 13px;
-    border-radius: 20px; cursor: pointer; border: 0.5px solid var(--border2);
-    background: var(--bg2); color: var(--text2); transition: all 0.15s; user-select: none;
-  }
-  .chip.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; font-weight: 500; }
-
-  .day-btn {
-    padding: 6px 14px; border-radius: var(--radius); border: 0.5px solid var(--border2);
-    background: var(--bg2); color: var(--text2); cursor: pointer; font-size: 13px;
-    transition: all 0.15s; font-weight: 500;
-  }
-  .day-btn.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
-
+  button { padding: 9px 18px; border-radius: var(--radius); cursor: pointer; font-weight: 500; border: 0.5px solid var(--border2); background: #fff; }
+  button.primary { background: var(--text); color: #fff; border: none; }
   .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
   .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
-  .metric-n { font-size: 28px; font-weight: 600; color: var(--text); }
-  .metric-l { font-size: 12px; color: var(--text2); margin-top: 3px; }
-
-  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--radius); font-weight: 500; }
-  .badge-ok { background: var(--success-bg); color: var(--success-text); }
-  .badge-err { background: var(--danger-bg); color: var(--danger-text); }
-  .badge-i { background: var(--info-bg); color: var(--info-text); }
-  .badge-w { background: var(--warning-bg); color: var(--warning-text); }
-
-  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-  th { font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
-  td { padding: 11px 10px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--bg); }
-
-  .status-bar {
-    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
-    background: var(--bg2); border-radius: var(--radius); margin-bottom: 1rem;
-    border: 0.5px solid var(--border);
-  }
-  .status-info { flex: 1; }
-  .status-title { font-size: 14px; font-weight: 500; color: var(--text); }
-  .status-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
-  .status-timer { font-size: 13px; color: var(--text2); font-family: var(--mono); }
-
-  #log-box {
-    font-family: var(--mono); font-size: 12px; background: #1a1a1a; color: #ccc;
-    border-radius: var(--radius); padding: 14px 16px; max-height: 200px; overflow-y: auto;
-    line-height: 1.8;
-  }
-  .log-ok { color: #86efac; }
-  .log-err { color: #fca5a5; }
-  .log-i { color: #93c5fd; }
-  .log-w { color: #fcd34d; }
-
-  .preview-box {
-    background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius);
-    padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.7;
-    white-space: pre-wrap; min-height: 80px;
-  }
-
-  .features-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13px; color: var(--text2); }
-  .features-list div::before { content: '✓ '; color: var(--success-text); font-weight: 600; }
-
-  .btn-row { display: flex; gap: 10px; align-items: center; }
-  .btn-row button { flex: 1; }
-
-  .section-sep { display: flex; align-items: center; gap: 10px; margin: 1.25rem 0; }
-  .section-sep span { font-size: 12px; color: var(--text3); white-space: nowrap; }
-  .section-sep::before, .section-sep::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
-
-  @media (max-width: 600px) {
-    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
-    .metrics { grid-template-columns: 1fr 1fr; }
-    .features-list { grid-template-columns: 1fr; }
-    .container { padding: 1rem; }
-  }
+  .metric-n { font-size: 24px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px; border-bottom: 0.5px solid var(--border); }
+  #log-box { font-family: var(--mono); font-size: 11px; background: #1a1a1a; color: #ccc; border-radius: 8px; padding: 12px; max-height: 150px; overflow-y: auto; margin-top: 10px; }
+  .log-ok { color: #86efac; } .log-err { color: #fca5a5; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">Buscador de Contatos</div>
-  <div class="topbar-sub">Google Places + WhatsApp via Z-API</div>
-  <div class="topbar-status">
-    <div class="status-dot" id="top-dot"></div>
-    <span id="top-status">Aguardando</span>
-  </div>
+  <div class="topbar-logo">Buscador Pro — Eduardo</div>
+  <div class="topbar-status"><div class="status-dot" id="top-dot"></div> <span id="top-status">Aguardando</span></div>
 </div>
 
 <div class="container">
-
-  <div class="step-bar">
-    <div class="step active" id="s1"><div class="step-dot">1</div>APIs</div>
-    <div class="sep"></div>
-    <div class="step" id="s2"><div class="step-dot">2</div>Buscar</div>
-    <div class="sep"></div>
-    <div class="step" id="s3"><div class="step-dot">3</div>Mensagem</div>
-    <div class="sep"></div>
-    <div class="step" id="s4"><div class="step-dot">4</div>Disparo</div>
-  </div>
-
   <div class="card">
-    <div class="card-title">Configurações das APIs <span class="tag">Passo 1</span></div>
-
-    <div class="grid2" style="margin-bottom:14px">
+    <div class="card-title">Configurações Iniciais</div>
+    <div class="grid2">
       <div>
-        <label>Chave Google Places API</label>
+        <label>Google Maps API Key</label>
         <input type="password" id="gkey" placeholder="AIzaSy...">
-        <div class="hint">console.cloud.google.com → Credenciais</div>
       </div>
       <div>
         <label>Claude API Key</label>
         <input type="password" id="claudekey" placeholder="sk-ant-...">
-        <div class="hint">console.anthropic.com → API Keys</div>
       </div>
     </div>
-
-    <div class="section-sep"><span>Z-API — WhatsApp</span></div>
-
-    <div class="grid3" style="margin-bottom:14px">
-      <div>
-        <label>Instance ID</label>
-        <input type="text" id="z-instance-id" placeholder="ex: 3DF2A1B...">
-        <div class="hint">Painel Z-API → instância → editar</div>
-      </div>
-      <div>
-        <label>Instance Token</label>
-        <input type="password" id="z-instance-token" placeholder="token da instância">
-        <div class="hint">Painel Z-API → instância → editar</div>
-      </div>
-      <div>
-        <label>Client Token</label>
-        <input type="password" id="z-client-token" placeholder="token da conta">
-        <div class="hint">app.z-api.io/app/security</div>
-      </div>
+    <div class="grid3" style="margin-top:15px">
+      <input type="text" id="z-id" placeholder="Instance ID">
+      <input type="password" id="z-token" placeholder="Instance Token">
+      <input type="password" id="z-client" placeholder="Client Token">
     </div>
-
-    <button class="primary" onclick="saveConfig()" style="width:100%">Salvar configurações e continuar →</button>
+    <button class="primary" onclick="initGoogleMaps()" style="width:100%; margin-top:15px">Conectar e Iniciar</button>
   </div>
 
   <div class="card">
-    <div class="card-title">Busca de contatos <span class="tag">Passo 2</span></div>
-
-    <div style="margin-bottom:14px">
-      <label>Tipo de serviço</label>
-      <input type="text" id="termo" placeholder="ex: manicure, cabeleireira, restaurante, dentista, academia...">
-      <div class="chips">
-        <span class="chip" onclick="setTermo(this)">Manicure</span>
-        <span class="chip" onclick="setTermo(this)">Cabeleireira</span>
-        <span class="chip" onclick="setTermo(this)">Restaurante</span>
-        <span class="chip" onclick="setTermo(this)">Dentista</span>
-        <span class="chip" onclick="setTermo(this)">Academia</span>
-        <span class="chip" onclick="setTermo(this)">Farmácia</span>
-        <span class="chip" onclick="setTermo(this)">Padaria</span>
-        <span class="chip" onclick="setTermo(this)">Oficina mecânica</span>
-        <span class="chip" onclick="setTermo(this)">Clínica estética</span>
-        <span class="chip" onclick="setTermo(this)">Barbearia</span>
-        <span class="chip" onclick="setTermo(this)">Pet shop</span>
-        <span class="chip" onclick="setTermo(this)">Psicólogo</span>
-      </div>
+    <div class="card-title">Filtros de Busca</div>
+    <div class="grid3">
+      <input type="text" id="termo" placeholder="Ex: Manicure">
+      <input type="text" id="cidade" placeholder="Cidade">
+      <select id="maxres">
+        <option value="10">10 resultados</option>
+        <option value="20" selected>20 resultados</option>
+        <option value="60">60 resultados</option>
+      </select>
     </div>
-
-    <div class="grid3" style="margin-bottom:14px">
-      <div>
-        <label>Bairro (opcional)</label>
-        <input type="text" id="bairro" placeholder="ex: Aldeota">
-      </div>
-      <div>
-        <label>Cidade</label>
-        <input type="text" id="cidade" placeholder="ex: Fortaleza">
-      </div>
-      <div>
-        <label>Estado</label>
-        <input type="text" id="estado" placeholder="ex: Ceará">
-      </div>
-    </div>
-
-    <div class="grid2" style="margin-bottom:14px">
-      <div>
-        <label>Máximo de resultados</label>
-        <select id="maxres">
-          <option value="20">20 contatos</option>
-          <option value="40">40 contatos</option>
-          <option value="60" selected>60 contatos</option>
-        </select>
-      </div>
-      <div>
-        <label>Avaliação mínima</label>
-        <select id="minrating">
-          <option value="0">Qualquer avaliação</option>
-          <option value="3">3+ estrelas</option>
-          <option value="4">4+ estrelas</option>
-          <option value="4.5">4.5+ estrelas</option>
-        </select>
-      </div>
-    </div>
-
-    <button class="primary" onclick="buscar()" id="btn-buscar" style="width:100%">Buscar contatos →</button>
+    <button class="primary" id="btn-buscar" onclick="buscarLocais()" style="width:100%; margin-top:15px" disabled>Buscar Contatos</button>
   </div>
 
   <div class="metrics">
-    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">encontrados</div></div>
-    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">com telefone</div></div>
-    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">enviadas hoje</div></div>
-    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">na fila</div></div>
+    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">Encontrados</div></div>
+    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">Com Telefone</div></div>
+    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">Enviados</div></div>
+    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">Fila</div></div>
   </div>
 
-  <div class="card" id="panel-results" style="display:none">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
-      <div class="card-title" style="margin:0">Contatos encontrados</div>
-      <div style="display:flex;gap:8px">
-        <button onclick="exportCSV()" style="font-size:12px;padding:6px 12px">Exportar CSV</button>
-        <button onclick="selecionarTodos()" style="font-size:12px;padding:6px 12px">Selecionar todos</button>
-        <button onclick="desmarcarTodos()" style="font-size:12px;padding:6px 12px">Desmarcar todos</button>
-      </div>
-    </div>
-    <div style="overflow-x:auto">
-      <table>
-        <thead><tr>
-          <th style="width:36px"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
-          <th style="width:28%">Nome</th>
-          <th style="width:16%">Telefone</th>
-          <th style="width:9%">Aval.</th>
-          <th style="width:32%">Endereço</th>
-          <th style="width:13%">Status</th>
-        </tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+  <div class="card hidden" id="panel-results">
+    <table id="tabela-contatos">
+      <thead>
+        <tr><th>Nome</th><th>Telefone</th><th>Status</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <button class="primary" onclick="iniciarDisparo()" style="width:100%; margin-top:15px">Iniciar Envios via WhatsApp</button>
   </div>
 
-  <div class="card" id="panel-msg" style="display:none">
-    <div class="card-title">Mensagem <span class="tag">Passo 3</span></div>
-
-    <div style="margin-bottom:14px">
-      <label>Mensagem base — a IA vai adaptar para cada contato automaticamente</label>
-      <textarea id="msg-base" rows="5" style="resize:vertical">Olá! Vi que vocês oferecem serviços de {termo} em {cidade}. Gostaria de saber mais sobre os serviços e valores. Pode me ajudar?</textarea>
-      <div class="hint">Variáveis: {nome} {termo} {cidade} {bairro} — a IA enriquece o restante sozinha.</div>
-    </div>
-
-    <div class="divider"></div>
-
-    <label style="margin-bottom:10px">O que a IA faz automaticamente em cada mensagem</label>
-    <div class="features-list" style="margin-bottom:1.25rem">
-      <div>Varia palavras mantendo o contexto</div>
-      <div>Saudação por horário (bom dia / boa tarde / boa noite)</div>
-      <div>Conexão pela cidade do DDD do telefone</div>
-      <div>Emojis variados por mensagem</div>
-      <div>Extrai primeiro nome do estabelecimento</div>
-      <div>Tom natural, não parece robô</div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div style="margin-bottom:10px">
-      <label>Preview — como ficará a próxima mensagem gerada pela IA</label>
-      <div class="preview-box" id="preview-box">Clique em "Gerar preview" para ver um exemplo com IA...</div>
-    </div>
-    <button onclick="gerarPreview()" id="btn-preview">Gerar preview com IA ↗</button>
-  </div>
-
-  <div class="card" id="panel-disparo" style="display:none">
-    <div class="card-title">Configurações de disparo <span class="tag">Passo 4</span></div>
-
-    <div class="grid4" style="margin-bottom:1.25rem">
-      <div>
-        <label>Intervalo entre envios</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="number" id="intervalo" value="60" min="10" max="3600">
-          <span style="font-size:13px;color:var(--text2);white-space:nowrap">seg</span>
-        </div>
-        <div class="hint">Mínimo recomendado: 30s</div>
-      </div>
-      <div>
-        <label>Limite diário de segurança</label>
-        <div style="display:flex;align-items:center;gap:8px">
-          <input type="number" id="limite-dia" value="50" min="1" max="500">
-          <span style="font-size:13px;color:var(--text2);white-space:nowrap">msgs</span>
-        </div>
-        <div class="hint">Recomendado: até 50/dia</div>
-      </div>
-      <div>
-        <label>Horário de início (Brasília)</label>
-        <input type="time" id="hora-inicio" value="08:00">
-      </div>
-      <div>
-        <label>Horário de fim (Brasília)</label>
-        <input type="time" id="hora-fim" value="20:00">
-      </div>
-    </div>
-
-    <div style="margin-bottom:1.25rem">
-      <label style="margin-bottom:10px">Dias permitidos para envio</label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        <button class="day-btn on" data-day="1" onclick="toggleDay(this)">Segunda</button>
-        <button class="day-btn on" data-day="2" onclick="toggleDay(this)">Terça</button>
-        <button class="day-btn on" data-day="3" onclick="toggleDay(this)">Quarta</button>
-        <button class="day-btn on" data-day="4" onclick="toggleDay(this)">Quinta</button>
-        <button class="day-btn on" data-day="5" onclick="toggleDay(this)">Sexta</button>
-        <button class="day-btn" data-day="6" onclick="toggleDay(this)">Sábado</button>
-        <button class="day-btn" data-day="0" onclick="toggleDay(this)">Domingo</button>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="status-bar">
-      <div class="status-dot stopped" id="status-dot"></div>
-      <div class="status-info">
-        <div class="status-title" id="status-txt">Aguardando início</div>
-        <div class="status-sub" id="status-sub">Configure e clique em iniciar disparo</div>
-      </div>
-      <div class="status-timer" id="next-timer"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="primary" onclick="iniciarDisparo()" id="btn-iniciar">Iniciar disparo →</button>
-      <button onclick="pausarDisparo()" id="btn-pausar" disabled>Pausar</button>
-      <button class="danger" onclick="pararDisparo()" id="btn-parar" disabled>Parar</button>
-    </div>
-  </div>
-
-  <div style="margin-top:1.25rem">
-    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">Log de atividade</div>
-    <div id="log-box"><span style="color:#555">Aguardando ações...</span></div>
-  </div>
-
+  <div id="log-box">Aguardando chaves para conectar...</div>
 </div>
 
+<div id="map" style="display:none"></div>
+
 <script>
-let contatos = [], config = {}, enviados = 0, filaIdx = 0;
-let disparoTimer = null, countdownTimer = null, pausado = false, rodando = false;
-let diasAtivos = new Set([1,2,3,4,5]);
+let contatos = [], enviados = 0, service, map;
 
-// ── LOG ──────────────────────────────────────────
 function log(msg, tipo) {
-  const b = document.getElementById('log-box');
-  const cls = tipo==='ok'?'log-ok':tipo==='err'?'log-err':tipo==='w'?'log-w':'log-i';
-  const t = new Date().toLocaleTimeString('pt-BR');
-  const line = document.createElement('div');
-  line.className = cls;
-  line.textContent = `[${t}] ${msg}`;
-  b.appendChild(line);
-  b.scrollTop = b.scrollHeight;
+  const box = document.getElementById('log-box');
+  const color = tipo === 'ok' ? 'log-ok' : tipo === 'err' ? 'log-err' : '';
+  box.innerHTML += `<div class="${color}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+  box.scrollTop = box.scrollHeight;
 }
 
-// ── CONFIG ───────────────────────────────────────
-function saveConfig() {
-  config.gkey = document.getElementById('gkey').value.trim();
-  config.claudekey = document.getElementById('claudekey').value.trim();
-  config.instanceId = document.getElementById('z-instance-id').value.trim();
-  config.instanceToken = document.getElementById('z-instance-token').value.trim();
-  config.clientToken = document.getElementById('z-client-token').value.trim();
+// SOLUÇÃO PARA O ERRO DE CORS: Carregar a biblioteca oficial do Google
+function initGoogleMaps() {
+  const key = document.getElementById('gkey').value.trim();
+  if(!key) return alert("Insira a chave do Google");
   
-  if (!config.gkey || !config.claudekey || !config.instanceId || !config.instanceToken || !config.clientToken) {
-    log('Preencha todos os campos de configuração antes de continuar.', 'err'); return;
-  }
-  log('Configurações salvas com sucesso.', 'ok');
-  setStep(2);
+  log("Conectando ao Google Maps...", "ok");
+  const script = document.createElement('script');
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&callback=mapsLoaded`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
 }
 
-// ── STEPS ────────────────────────────────────────
-function setStep(n) {
-  for (let i = 1; i <= 4; i++) {
-    const s = document.getElementById('s'+i);
-    s.className = 'step'+(i<n?' done':i===n?' active':'');
-    s.querySelector('.step-dot').textContent = i<n?'✓':i;
-  }
+function mapsLoaded() {
+  log("Google Maps conectado com sucesso!", "ok");
+  document.getElementById('btn-buscar').disabled = false;
+  map = new google.maps.Map(document.getElementById('map'));
+  service = new google.maps.places.PlacesService(map);
 }
 
-// ── CHIPS ────────────────────────────────────────
-function setTermo(el) {
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById('termo').value = el.textContent;
-}
+function buscarLocais() {
+  const termo = document.getElementById('termo').value;
+  const cidade = document.getElementById('cidade').value;
+  
+  log(`Buscando ${termo} em ${cidade}...`);
+  
+  const request = {
+    query: `${termo} em ${cidade}`,
+    fields: ['name', 'place_id', 'formatted_address', 'geometry']
+  };
 
-function toggleDay(el) {
-  const d = parseInt(el.dataset.day);
-  if (diasAtivos.has(d)) { diasAtivos.delete(d); el.classList.remove('on'); }
-  else { diasAtivos.add(d); el.classList.add('on'); }
-}
-
-// ── HORÁRIO / JANELA ──────────────────────────────
-function horarioBrasilia() {
-  return new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Sao_Paulo'}));
-}
-
-function dentroJanela() {
-  const agora = horarioBrasilia();
-  if (!diasAtivos.has(agora.getDay())) return false;
-  const hI = document.getElementById('hora-inicio').value.split(':').map(Number);
-  const hF = document.getElementById('hora-fim').value.split(':').map(Number);
-  const min = agora.getHours()*60+agora.getMinutes();
-  return min >= (hI[0]*60+hI[1]) && min < (hF[0]*60+hF[1]);
-}
-
-function saudacaoPorHorario() {
-  const h = horarioBrasilia().getHours();
-  if (h>=5 && h<12) return 'Bom dia';
-  if (h>=12 && h<18) return 'Boa tarde';
-  return 'Boa noite';
-}
-
-// ── HELPERS IA ────────────────────────────────────
-function extrairPrimeiroNome(nome) {
-  const stop = ['salao','salon','studio','clinica','barbearia','espaco','centro','de','da','do','e','beauty','hair','nail'];
-  const partes = nome.split(/[\s,\-&]+/);
-  const filtrado = partes.filter(p=>p.length>2 && !stop.includes(p.toLowerCase()));
-  return filtrado[0]||partes[0]||nome;
-}
-
-function dddParaCidade(telefone) {
-  const ddd = (telefone||"").replace(/\D/g,'').substring(0,2);
-  const mapa = {'11':'São Paulo','21':'Rio de Janeiro','31':'Belo Horizonte','41':'Curitiba','51':'Porto Alegre','61':'Brasília','71':'Salvador','81':'Recife','85':'Fortaleza'};
-  return mapa[ddd]||null;
-}
-
-// ── BUSCA GOOGLE ──────────────────────────────────
-async function buscar() {
-  const termo = document.getElementById('termo').value.trim();
-  const cidade = document.getElementById('cidade').value.trim();
-  const maxres = parseInt(document.getElementById('maxres').value);
-  const minrating = parseFloat(document.getElementById('minrating').value);
-
-  if (!config.gkey) { log('Salve as configurações primeiro.', 'err'); return; }
-  if (!termo || !cidade) { log('Preencha termo e cidade.', 'err'); return; }
-
-  const btn = document.getElementById('btn-buscar');
-  btn.textContent = 'Buscando...'; btn.disabled = true;
-  log(`Iniciando busca por "${termo}" em ${cidade}`, 'i');
-
-  try {
-    const query = `${termo} em ${cidade}`;
-    const geoResp = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${config.gkey}`);
-    const geoData = await geoResp.json();
-    if (!geoData.results?.[0]) throw new Error("Local não encontrado.");
-    
-    const loc = geoData.results[0].geometry.location;
-    let allPlaces = [], pageToken = null;
-
-    do {
-      let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${loc.lat},${loc.lng}&radius=5000&keyword=${encodeURIComponent(termo)}&key=${config.gkey}&language=pt-BR`;
-      if (pageToken) url += `&pagetoken=${pageToken}`;
-      const pResp = await fetch(url);
-      const pData = await pResp.json();
-      allPlaces = allPlaces.concat(pData.results || []);
-      pageToken = pData.next_page_token;
-      if (pageToken && allPlaces.length < maxres) await new Promise(r=>setTimeout(r, 2000));
-    } while (pageToken && allPlaces.length < maxres);
-
-    allPlaces = allPlaces.filter(p => (p.rating||0) >= minrating).slice(0, maxres);
-    log(`Encontrados ${allPlaces.length} locais. Buscando telefones...`, 'ok');
-
-    contatos = [];
-    for (let i=0; i<allPlaces.length; i++) {
-      const p = allPlaces[i];
-      const dResp = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${p.place_id}&fields=name,formatted_phone_number,formatted_address,rating&key=${config.gkey}`);
-      const dData = await dResp.json();
-      const res = dData.result || {};
-      contatos.push({
-        id: p.place_id,
-        nome: res.name || p.name,
-        telefone: res.formatted_phone_number || "",
-        endereco: res.formatted_address || "",
-        rating: res.rating || p.rating || 0,
-        status: 'pendente',
-        selecionado: !!res.formatted_phone_number
+  service.textSearch(request, (results, status) => {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+      contatos = [];
+      results.forEach(place => {
+        // Para cada lugar, buscamos o detalhe (telefone)
+        service.getDetails({ placeId: place.place_id, fields: ['name', 'formatted_phone_number'] }, (details, s2) => {
+          if (s2 === google.maps.places.PlacesServiceStatus.OK) {
+            contatos.push({
+              nome: details.name,
+              telefone: details.formatted_phone_number || '',
+              status: details.formatted_phone_number ? 'Pendente' : 'Sem Fone'
+            });
+            render();
+          }
+        });
       });
+      document.getElementById('panel-results').classList.remove('hidden');
+    } else {
+      log("Erro na busca: " + status, "err");
     }
-
-    renderTabela();
-    atualizarMetricas();
-    document.getElementById('panel-results').style.display='block';
-    document.getElementById('panel-msg').style.display='block';
-    document.getElementById('panel-disparo').style.display='block';
-    setStep(3);
-    log('Busca concluída.', 'ok');
-  } catch(e) { log('Erro na busca: '+e.message, 'err'); }
-  btn.textContent = 'Buscar contatos →'; btn.disabled = false;
-}
-
-// ── DISPARO E Z-API ───────────────────────────────
-async function enviarWhatsApp(phone, text) {
-  const cleanPhone = phone.replace(/\D/g,'');
-  const url = `https://api.z-api.io/instances/${config.instanceId}/token/${config.instanceToken}/send-text`;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Client-Token': config.clientToken },
-    body: JSON.stringify({ phone: cleanPhone, message: text })
   });
-  return resp.ok;
 }
 
-async function gerarMensagemIA(contato, msgBase, termo, cidade) {
-  const prompt = `Reescreva esta mensagem para WhatsApp de forma natural: "${msgBase.replace('{nome}', contato.nome).replace('{termo}', termo).replace('{cidade}', cidade)}". 
-  Use saudação de "${saudacaoPorHorario()}", emojis leves e tom amigável.`;
+function render() {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = contatos.map(c => `
+    <tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.status}</td></tr>
+  `).join('');
+  document.getElementById('m-total').textContent = contatos.length;
+  document.getElementById('m-phone').textContent = contatos.filter(x => x.telefone).length;
+}
+
+async function iniciarDisparo() {
+  log("Iniciando fila de disparos...", "ok");
+  for (let c of contatos) {
+    if (c.status === 'Pendente' && c.telefone) {
+      log(`Enviando para ${c.nome}...`);
+      await enviarZapi(c);
+      await new Promise(r => setTimeout(r, 30000)); // Espera 30s entre envios para segurança
+    }
+  }
+}
+
+async function enviarZapi(c) {
+  const id = document.getElementById('z-id').value;
+  const token = document.getElementById('z-token').value;
+  const client = document.getElementById('z-client').value;
   
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': config.claudekey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-3-5-sonnet-20240620', max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
-  });
-  const data = await resp.json();
-  return data.content?.[0]?.text || msgBase;
-}
-
-async function processarProximo() {
-  if (!rodando || pausado) return;
-  if (!dentroJanela()) { 
-    log('Fora do horário ou dia permitido. Aguardando...', 'w');
-    setStatus('Aguardando Janela', 'O disparo continuará automaticamente no horário configurado', 'paused');
-    disparoTimer = setTimeout(processarProximo, 60000);
-    return;
-  }
-
-  const fila = contatos.filter((c, i) => i >= filaIdx && c.selecionado && c.status === 'pendente');
-  if (!fila.length || enviados >= parseInt(document.getElementById('limite-dia').value)) {
-    pararDisparo();
-    log('Disparo finalizado ou limite atingido.', 'ok');
-    return;
-  }
-
-  const contato = fila[0];
-  const originalIdx = contatos.findIndex(c => c.id === contato.id);
+  const fone = c.telefone.replace(/\D/g, '');
   
   try {
-    setStatus('Gerando Mensagem', `IA criando texto para ${contato.nome}...`, 'running');
-    const msg = await gerarMensagemIA(contato, document.getElementById('msg-base').value, document.getElementById('termo').value, document.getElementById('cidade').value);
-    
-    setStatus('Enviando', `Z-API enviando para ${contato.telefone}...`, 'running');
-    const ok = await enviarWhatsApp(contato.telefone, msg);
-    
-    if (ok) {
-      contatos[originalIdx].status = 'enviado';
+    const res = await fetch(`https://api.z-api.io/instances/${id}/token/${token}/send-text`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Client-Token': client },
+      body: JSON.stringify({ phone: '55' + fone, message: `Olá ${c.nome}, tudo bem?` })
+    });
+    if (res.ok) {
+      c.status = 'Enviado';
       enviados++;
-      log(`Sucesso: ${contato.nome}`, 'ok');
-    } else {
-      throw new Error("Erro Z-API");
+      document.getElementById('m-sent').textContent = enviados;
+      render();
     }
-  } catch(e) {
-    contatos[originalIdx].status = 'erro';
-    log(`Falha em ${contato.nome}: ${e.message}`, 'err');
+  } catch (e) {
+    log("Erro Z-API: " + e.message, "err");
   }
-
-  filaIdx = originalIdx + 1;
-  renderTabela();
-  atualizarMetricas();
-  agendarProximo();
-}
-
-function agendarProximo() {
-  let seg = parseInt(document.getElementById('intervalo').value);
-  setStatus('Aguardando', `Próximo envio em ${seg}s`, 'running');
-  
-  clearInterval(countdownTimer);
-  countdownTimer = setInterval(() => {
-    seg--;
-    document.getElementById('next-timer').textContent = `Próximo: ${seg}s`;
-    if (seg <= 0) clearInterval(countdownTimer);
-  }, 1000);
-
-  disparoTimer = setTimeout(processarProximo, seg * 1000);
-}
-
-// ── INTERFACE ─────────────────────────────────────
-function renderTabela() {
-  document.getElementById('tbody').innerHTML = contatos.map((c,i)=>`
-    <tr>
-      <td><input type="checkbox" ${c.selecionado?'checked':''} onchange="toggleItem(${i},this)" ${!c.telefone?'disabled':''}></td>
-      <td style="font-weight:500;">${c.nome}</td>
-      <td>${c.telefone || '---'}</td>
-      <td>★${c.rating}</td>
-      <td>${c.endereco}</td>
-      <td><span class="badge ${c.status==='enviado'?'badge-ok':c.status==='erro'?'badge-err':'badge-i'}">${c.status}</span></td>
-    </tr>`).join('');
-}
-
-function setStatus(tit, sub, dot) {
-  document.getElementById('status-txt').textContent = tit;
-  document.getElementById('status-sub').textContent = sub;
-  document.getElementById('status-dot').className = 'status-dot ' + dot;
-}
-
-function atualizarMetricas() {
-  document.getElementById('m-total').textContent = contatos.length;
-  document.getElementById('m-phone').textContent = contatos.filter(c=>c.telefone).length;
-  document.getElementById('m-sent').textContent = enviados;
-  document.getElementById('m-pending').textContent = contatos.filter(c=>c.selecionado && c.status==='pendente').length;
-}
-
-function toggleItem(i, el) { contatos[i].selecionado = el.checked; atualizarMetricas(); }
-function selecionarTodos() { contatos.forEach(c => { if(c.telefone) c.selecionado = true; }); renderTabela(); atualizarMetricas(); }
-function desmarcarTodos() { contatos.forEach(c => c.selecionado = false); renderTabela(); atualizarMetricas(); }
-
-function iniciarDisparo() {
-  if (!config.instanceId) { log('Configure as APIs primeiro.', 'err'); return; }
-  rodando = true; pausado = false;
-  document.getElementById('btn-iniciar').disabled = true;
-  document.getElementById('btn-pausar').disabled = false;
-  document.getElementById('btn-parar').disabled = false;
-  log('Iniciando sequência de disparos...', 'i');
-  processarProximo();
-}
-
-function pausarDisparo() {
-  pausado = !pausado;
-  document.getElementById('btn-pausar').textContent = pausado ? 'Retomar' : 'Pausar';
-  if (!pausado) processarProximo();
-  else { clearTimeout(disparoTimer); log('Disparo pausado.', 'w'); }
-}
-
-function pararDisparo() {
-  rodando = false;
-  clearTimeout(disparoTimer);
-  clearInterval(countdownTimer);
-  document.getElementById('btn-iniciar').disabled = false;
-  document.getElementById('btn-pausar').disabled = true;
-  document.getElementById('btn-parar').disabled = true;
-  setStatus('Parado', 'Disparo encerrado pelo usuário', 'stopped');
-}
-
-async function gerarPreview() {
-  const sel = contatos.find(c => c.selecionado && c.telefone);
-  if (!sel) { log('Selecione um contato com telefone para o preview.', 'w'); return; }
-  document.getElementById('preview-box').textContent = "Gerando...";
-  const msg = await gerarMensagemIA(sel, document.getElementById('msg-base').value, document.getElementById('termo').value, document.getElementById('cidade').value);
-  document.getElementById('preview-box').textContent = msg;
 }
 </script>
 </body>
