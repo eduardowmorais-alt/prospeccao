@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscador de Contatos — Minha Manicure</title>
+<title>Buscador de Contatos — Disparo WhatsApp</title>
 <style>
   :root {
     --bg: #f9f9f8; --bg2: #f0efea; --bg3: #e8e7e2; --card: #ffffff;
@@ -15,65 +15,81 @@
     --danger-bg: #fcebeb; --danger-text: #791f1f;
     --radius: 8px; --radius-lg: 12px;
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'SF Mono', 'Fira Code', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
+  
   .topbar { background: var(--card); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 12px; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .topbar-logo { font-size: 16px; font-weight: 600; }
+  .topbar-logo { font-size: 16px; font-weight: 600; color: var(--text); }
+  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
+  .status-dot.running { background: #22c55e; }
+  .status-dot.paused { background: #f59e0b; }
+
   .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
   .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
   .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+  
   label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
-  input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; outline: none; }
+  input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; outline: none; background: var(--card); }
+  
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  button { padding: 10px 20px; border-radius: var(--radius); border: 1px solid var(--border2); cursor: pointer; font-weight: 500; transition: 0.2s; }
-  button.primary { background: #1a1a1a; color: white; border: none; }
-  button.primary:hover { background: #333; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .chip { padding: 6px 12px; background: var(--bg2); border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
-  .chip.active { background: var(--info-bg); color: var(--info-text); border-color: var(--info-text); }
-  #log-box { font-family: monospace; font-size: 12px; background: #1a1a1a; color: #adadad; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto; margin-top: 20px; }
-  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-  .metric { background: var(--bg2); padding: 15px; border-radius: 8px; text-align: center; }
-  .metric-n { font-size: 24px; font-weight: bold; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  
+  button { padding: 9px 18px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--card); color: var(--text); font-size: 14px; cursor: pointer; font-weight: 500; transition: 0.15s; }
+  button.primary { background: var(--text); color: #fff; border-color: var(--text); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .chip { display: inline-flex; align-items: center; font-size: 13px; padding: 5px 13px; border-radius: 20px; cursor: pointer; border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text2); }
+  .chip.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; font-weight: 500; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
+  .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
+  .metric-n { font-size: 28px; font-weight: 600; color: var(--text); }
+  .metric-l { font-size: 12px; color: var(--text2); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px; border-bottom: 0.5px solid var(--border); text-align: left; }
+
+  #log-box { font-family: var(--mono); font-size: 12px; background: #1a1a1a; color: #ccc; border-radius: var(--radius); padding: 14px; max-height: 200px; overflow-y: auto; margin-top: 20px; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="topbar-logo">Minha Manicure — Prospecção Inteligente</div>
+  <div class="topbar-status"><div class="status-dot" id="top-dot"></div><span id="top-status">Aguardando</span></div>
 </div>
 
 <div class="container">
   <div class="card">
     <div class="card-title">1. Configurações de API</div>
     <div class="grid2">
-      <div><label>Claude API Key</label><input type="password" id="claudekey" placeholder="sk-ant-..."></div>
-      <div><label>Google Maps Key</label><input type="password" id="gkey" placeholder="AIzaSy..."></div>
+      <div><label>Claude API Key</label><input type="password" id="claudekey"></div>
+      <div><label>Google Maps Key</label><input type="password" id="gkey"></div>
     </div>
-    <div class="grid3" style="margin-top:15px">
-      <div><label>Z-API Instance ID</label><input type="text" id="z-id"></div>
+    <div class="grid3" style="margin-top:14px">
+      <div><label>Z-API ID</label><input type="text" id="z-id"></div>
       <div><label>Instance Token</label><input type="password" id="z-token"></div>
       <div><label>Client Token</label><input type="password" id="z-client"></div>
     </div>
-    <button class="primary" style="width:100%; margin-top:15px" onclick="saveConfig()">Salvar Configurações</button>
+    <button class="primary" style="width:100%; margin-top:14px" onclick="saveConfig()">Salvar Configurações</button>
   </div>
 
   <div class="card">
     <div class="card-title">2. Critérios de Busca</div>
     <div class="grid2">
-      <div><label>O que buscar? (Ex: Manicure, Salão)</label><input type="text" id="termo" value="Manicure"></div>
+      <div><label>O que buscar?</label><input type="text" id="termo" value="Manicure"></div>
       <div><label>Bairro</label><input type="text" id="bairro" placeholder="Ex: Aldeota"></div>
     </div>
-    <div class="grid2" style="margin-top:15px">
+    <div class="grid2" style="margin-top:14px">
       <div><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
       <div><label>Estado (UF)</label><input type="text" id="estado" value="CE"></div>
     </div>
-    <button class="primary" style="width:100%; margin-top:15px" onclick="executarBusca()">Buscar Profissionais</button>
+    <button class="primary" style="width:100%; margin-top:14px" onclick="executarBusca()">Buscar Profissionais</button>
   </div>
 
   <div class="metrics">
@@ -84,45 +100,52 @@
   </div>
 
   <div class="card" id="panel-results" style="display:none">
-    <div class="card-title">3. Resultados da Busca</div>
-    <table>
-      <thead><tr><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
+    <div class="card-title">3. Resultados da Busca <button onclick="exportCSV()" style="margin-left:auto; font-size:11px">Exportar CSV</button></div>
+    <div style="max-height:300px; overflow-y:auto">
+      <table>
+        <thead><tr><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="card" id="panel-disparo" style="display:none">
     <div class="card-title">4. Configuração de Disparo</div>
-    <label>Mensagem Base (A IA irá variar o texto)</label>
-    <textarea id="msg-base" rows="3">Olá {nome}, vi seu trabalho em {cidade} e achei incrível! Conheça o app Minha Manicure.</textarea>
+    <label>Mensagem Base</label>
+    <textarea id="msg-base" rows="3">Olá {nome}, vi seu trabalho em {cidade} e achei incrível!</textarea>
     
-    <div class="grid3" style="margin-top:15px">
-      <div><label>Intervalo (seg)</label><input type="number" id="intervalo" value="60"></div>
+    <div class="grid3" style="margin-top:14px">
+      <div><label>Intervalo (s)</label><input type="number" id="intervalo" value="60"></div>
       <div><label>Início</label><input type="time" id="h-ini" value="08:00"></div>
       <div><label>Fim</label><input type="time" id="h-fim" value="20:00"></div>
     </div>
 
     <div class="chips" id="dias">
-      <div class="chip active" onclick="this.classList.toggle('active')">Seg</div>
-      <div class="chip active" onclick="this.classList.toggle('active')">Ter</div>
-      <div class="chip active" onclick="this.classList.toggle('active')">Qua</div>
-      <div class="chip active" onclick="this.classList.toggle('active')">Qui</div>
-      <div class="chip active" onclick="this.classList.toggle('active')">Sex</div>
-      <div class="chip active" onclick="this.classList.toggle('active')">Sab</div>
-      <div class="chip" onclick="this.classList.toggle('active')">Dom</div>
+      <div class="chip on" onclick="this.classList.toggle('on')">Seg</div>
+      <div class="chip on" onclick="this.classList.toggle('on')">Ter</div>
+      <div class="chip on" onclick="this.classList.toggle('on')">Qua</div>
+      <div class="chip on" onclick="this.classList.toggle('on')">Qui</div>
+      <div class="chip on" onclick="this.classList.toggle('on')">Sex</div>
+      <div class="chip on" onclick="this.classList.toggle('on')">Sab</div>
+      <div class="chip" onclick="this.classList.toggle('on')">Dom</div>
     </div>
 
-    <button class="primary" style="width:100%; margin-top:15px" onclick="iniciarEnvio()" id="btn-envio">Iniciar Sequência de Envios</button>
+    <div class="grid3" style="margin-top:20px">
+      <button class="primary" onclick="iniciarEnvio()" id="btn-iniciar">Iniciar</button>
+      <button onclick="pausarDisparo()" id="btn-pausar" disabled>Pausar</button>
+      <button onclick="pararDisparo()" id="btn-parar" disabled>Parar</button>
+    </div>
+    <div id="next-timer" style="font-size:12px; color:var(--text2); margin-top:10px; text-align:center"></div>
   </div>
 
-  <div id="log-box">Aguardando comandos...</div>
+  <div id="log-box">Aguardando...</div>
 </div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=COLOQUE_SUA_CHAVE_AQUI&libraries=places"></script>
 
 <script>
-let contatos = [];
-let config = {};
+let contatos = [], enviados = 0, rodando = false, pausado = false;
+let disparoTimer, countdownTimer, config = {};
 
 function log(m, t) {
   const lb = document.getElementById('log-box');
@@ -130,10 +153,14 @@ function log(m, t) {
   lb.scrollTop = lb.scrollHeight;
 }
 
+function setStatus(txt, sub, css) {
+  document.getElementById('top-status').textContent = txt;
+  document.getElementById('top-dot').className = 'status-dot ' + css;
+}
+
 function saveConfig() {
   config = {
     claudekey: document.getElementById('claudekey').value,
-    gkey: document.getElementById('gkey').value,
     zid: document.getElementById('z-id').value,
     ztoken: document.getElementById('z-token').value,
     zclient: document.getElementById('z-client').value
@@ -143,30 +170,34 @@ function saveConfig() {
 
 function executarBusca() {
   const termo = document.getElementById('termo').value;
-  const local = `${document.getElementById('bairro').value} ${document.getElementById('cidade').value} ${document.getElementById('estado').value}`;
+  const bairro = document.getElementById('bairro').value;
+  const cidade = document.getElementById('cidade').value;
+  const estado = document.getElementById('estado').value;
+  const local = `${bairro} ${cidade} ${estado}`;
   
   log(`Buscando ${termo} em ${local}...`, "ok");
-  
   const service = new google.maps.places.PlacesService(document.createElement('div'));
   const geocoder = new google.maps.Geocoder();
 
   geocoder.geocode({ address: local }, (results, status) => {
-    if (status !== 'OK') { log("Erro ao localizar endereço: " + status, "err"); return; }
+    if (status !== 'OK') { log("Erro localização: " + status, "err"); return; }
     
-    const request = {
-      location: results[0].geometry.location,
-      radius: '5000',
-      keyword: termo
-    };
+    const request = { location: results[0].geometry.location, radius: '5000', keyword: termo };
 
     service.nearbySearch(request, (places, statusNearby) => {
-      if (statusNearby !== 'OK') { log("Nenhum resultado encontrado.", "err"); return; }
+      if (statusNearby !== 'OK') { log("Sem resultados.", "err"); return; }
       
       contatos = [];
       places.forEach(p => {
-        service.getDetails({ placeId: p.place_id, fields: ['name', 'formatted_phone_number'] }, (details, s) => {
-          if (s === 'OK' && details.formatted_phone_number) {
-            contatos.push({ nome: details.name, fone: details.formatted_phone_number, status: 'Pendente' });
+        service.getDetails({ placeId: p.place_id, fields: ['name', 'formatted_phone_number', 'rating', 'vicinity'] }, (details, s) => {
+          if (s === 'OK') {
+            contatos.push({
+              nome: details.name,
+              fone: details.formatted_phone_number || '',
+              rating: details.rating || 0,
+              endereco: details.vicinity || '',
+              status: details.formatted_phone_number ? 'Pendente' : 'Sem WhatsApp'
+            });
             atualizarTabela();
           }
         });
@@ -179,32 +210,88 @@ function executarBusca() {
 
 function atualizarTabela() {
   const tb = document.getElementById('tbody');
-  tb.innerHTML = contatos.map(c => `<tr><td>${c.nome}</td><td>${c.fone}</td><td>${c.status}</td></tr>`).join('');
+  tb.innerHTML = contatos.map(c => `<tr><td>${c.nome}</td><td>${c.fone || '—'}</td><td>${c.status}</td></tr>`).join('');
   document.getElementById('m-total').textContent = contatos.length;
   document.getElementById('m-phone').textContent = contatos.filter(c => c.fone).length;
   document.getElementById('m-pending').textContent = contatos.filter(c => c.status == 'Pendente').length;
+  document.getElementById('m-sent').textContent = enviados;
 }
 
 async function iniciarEnvio() {
-  log("Iniciando sequência inteligente de disparos...", "ok");
-  const msgBase = document.getElementById('msg-base').value;
-  const intervalo = document.getElementById('intervalo').value * 1000;
+  if (rodando && !pausado) return;
+  rodando = true; pausado = false;
+  document.getElementById('btn-iniciar').disabled = true;
+  document.getElementById('btn-pausar').disabled = false;
+  document.getElementById('btn-parar').disabled = false;
+  document.getElementById('btn-pausar').textContent = 'Pausar';
+  setStatus('Rodando', 'Enviando mensagens...', 'running');
+  processarFila();
+}
 
-  for (let c of contatos) {
-    if (c.status === 'Pendente') {
-      log(`Gerando variação de IA para ${c.nome}...`, "ok");
-      // Aqui entraria a chamada real do Claude. Para o teste, simulamos:
-      await new Promise(r => setTimeout(r, 2000)); 
-      
-      log(`Disparando WhatsApp para ${c.fone} via Z-API...`, "ok");
-      c.status = 'Enviado';
-      atualizarTabela();
-      document.getElementById('m-sent').textContent = contatos.filter(c => c.status == 'Enviado').length;
-      
-      log(`Aguardando intervalo de segurança (${intervalo/1000}s)...`);
-      await new Promise(r => setTimeout(r, intervalo));
-    }
+async function processarFila() {
+  if (!rodando || pausado) return;
+
+  const proximo = contatos.find(c => c.status === 'Pendente');
+  if (!proximo) {
+    log("Fila concluída!", "ok");
+    pararDisparo();
+    return;
   }
+
+  log(`Processando: ${proximo.nome}...`, "ok");
+  // Simulação de envio
+  await new Promise(r => setTimeout(r, 2000));
+  proximo.status = 'Enviado';
+  enviados++;
+  atualizarTabela();
+
+  let seg = parseInt(document.getElementById('intervalo').value);
+  countdown(seg);
+  disparoTimer = setTimeout(processarFila, seg * 1000);
+}
+
+function countdown(s) {
+  clearInterval(countdownTimer);
+  const display = document.getElementById('next-timer');
+  countdownTimer = setInterval(() => {
+    s--;
+    display.textContent = `Próximo envio em ${s}s`;
+    if (s <= 0) clearInterval(countdownTimer);
+  }, 1000);
+}
+
+function pausarDisparo() {
+  pausado = !pausado;
+  document.getElementById('btn-pausar').textContent = pausado ? 'Retomar' : 'Pausar';
+  if (pausado) {
+    clearTimeout(disparoTimer);
+    clearInterval(countdownTimer);
+    setStatus('Pausado', 'Aguardando retomada', 'paused');
+  } else {
+    iniciarEnvio();
+  }
+}
+
+function pararDisparo() {
+  rodando = false; pausado = false;
+  clearTimeout(disparoTimer);
+  clearInterval(countdownTimer);
+  document.getElementById('btn-iniciar').disabled = false;
+  document.getElementById('btn-pausar').disabled = true;
+  document.getElementById('btn-parar').disabled = true;
+  document.getElementById('next-timer').textContent = '';
+  setStatus('Encerrado', 'Disparo finalizado', '');
+}
+
+function exportCSV() {
+  const rows = [['Nome','Telefone','Status']];
+  contatos.forEach(c => rows.push([c.nome, c.fone, c.status]));
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'contatos.csv';
+  a.click();
 }
 </script>
 </body>
