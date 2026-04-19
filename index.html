@@ -29,7 +29,7 @@
     --mono: 'SF Mono', 'Fira Code', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
   
   .topbar {
     background: var(--card);
@@ -43,419 +43,683 @@
     top: 0;
     z-index: 100;
   }
-  .topbar-logo { font-size: 16px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
-  .topbar-sub { font-size: 13px; color: var(--text2); font-weight: 400; }
-  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); padding: 4px 12px; background: var(--bg2); border-radius: 20px; border: 0.5px solid var(--border); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); position: relative; }
-  .status-dot::after { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border-radius: 50%; border: 2px solid currentColor; opacity: 0.2; display: none; }
-  .status-dot.running { background: #22c55e; color: #22c55e; }
-  .status-dot.running::after { display: block; animation: pulse 2s infinite; }
+  .topbar-logo { font-size: 16px; font-weight: 600; color: var(--text); }
+  .topbar-sub { font-size: 13px; color: var(--text2); }
+  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
+  .status-dot.running { background: #22c55e; }
   .status-dot.paused { background: #f59e0b; }
-  
-  @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2.5); opacity: 0; } }
 
   .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .step-bar { display: flex; align-items: center; margin-bottom: 2rem; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); }
+  .step.done { color: var(--success-text); }
+  .step.active { color: var(--text); font-weight: 500; }
+  .step-dot { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .step.done .step-dot { background: var(--success-bg); color: var(--success-text); border-color: transparent; }
+  .step.active .step-dot { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
+  .sep { flex: 1; height: 0.5px; background: var(--border); margin: 0 10px; }
+
+  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .card-title .tag { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; background: var(--info-bg); color: var(--info-text); }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
+
+  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
+  input[type=text], input[type=password], input[type=number], input[type=time], select, textarea {
+    width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #378add; box-shadow: 0 0 0 3px rgba(55,138,221,0.15); }
+  .hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-
-  .field { margin-bottom: 14px; }
-  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 6px; font-weight: 500; }
-  
-  input[type=text], input[type=password], input[type=number], input[type=time], select, textarea {
-    width: 100%; padding: 10px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius);
-    background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
-    outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--text); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 
   button {
-    padding: 10px 20px; border: 0.5px solid var(--border2); border-radius: var(--radius);
+    padding: 9px 18px; border: 0.5px solid var(--border2); border-radius: var(--radius);
     background: var(--card); color: var(--text); font-family: var(--font); font-size: 14px;
-    cursor: pointer; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; transition: all 0.15s; font-weight: 500;
   }
-  button:hover:not(:disabled) { background: var(--bg2); border-color: var(--text); }
+  button:hover { background: var(--bg2); }
+  button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   button.primary { background: var(--text); color: #fff; border-color: var(--text); }
-  button.primary:hover:not(:disabled) { background: #333; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.primary:hover { background: #333; }
+  button.danger { background: var(--danger-bg); color: var(--danger-text); border-color: transparent; }
+  button.success { background: var(--success-bg); color: var(--success-text); border-color: transparent; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+  .chip {
+    display: inline-flex; align-items: center; font-size: 13px; padding: 5px 13px;
+    border-radius: 20px; cursor: pointer; border: 0.5px solid var(--border2);
+    background: var(--bg2); color: var(--text2); transition: all 0.15s; user-select: none;
+  }
+  .chip.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; font-weight: 500; }
+
+  .day-btn {
+    padding: 6px 14px; border-radius: var(--radius); border: 0.5px solid var(--border2);
+    background: var(--bg2); color: var(--text2); cursor: pointer; font-size: 13px;
+    transition: all 0.15s; font-weight: 500;
+  }
+  .day-btn.on { background: var(--info-bg); color: var(--info-text); border-color: transparent; }
 
   .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
-  .metric { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; }
-  .metric-n { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 4px; }
-  .metric-l { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
+  .metric-n { font-size: 28px; font-weight: 600; color: var(--text); }
+  .metric-l { font-size: 12px; color: var(--text2); margin-top: 3px; }
 
-  .table-container { border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--card); }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: var(--radius); font-weight: 500; }
+  .badge-ok { background: var(--success-bg); color: var(--success-text); }
+  .badge-err { background: var(--danger-bg); color: var(--danger-text); }
+  .badge-i { background: var(--info-bg); color: var(--info-text); }
+  .badge-w { background: var(--warning-bg); color: var(--warning-text); }
+
   table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-  th { background: var(--bg); font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 10px 12px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; }
-  td { padding: 12px; border-bottom: 0.5px solid var(--border); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  th { font-size: 11px; font-weight: 600; color: var(--text2); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 11px 10px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   tr:last-child td { border-bottom: none; }
-  
-  .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .badge-pending { background: var(--warning-bg); color: var(--warning-text); }
-  .badge-sent { background: var(--success-bg); color: var(--success-text); }
-  .badge-error { background: var(--danger-bg); color: var(--danger-text); }
+  tr:hover td { background: var(--bg); }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+    background: var(--bg2); border-radius: var(--radius); margin-bottom: 1rem;
+    border: 0.5px solid var(--border);
+  }
+  .status-info { flex: 1; }
+  .status-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .status-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .status-timer { font-size: 13px; color: var(--text2); font-family: var(--mono); }
 
   #log-box {
-    font-family: var(--mono); font-size: 12px; background: #000; color: #fff;
-    border-radius: var(--radius); padding: 1rem; max-height: 240px; overflow-y: auto; margin-top: 1.25rem;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); line-height: 1.5;
+    font-family: var(--mono); font-size: 12px; background: #1a1a1a; color: #ccc;
+    border-radius: var(--radius); padding: 14px 16px; max-height: 200px; overflow-y: auto;
+    line-height: 1.8;
   }
-  .log-line { margin-bottom: 4px; display: flex; gap: 8px; }
-  .log-ts { color: #555; flex-shrink: 0; }
-  .log-msg-i { color: #3b82f6; }
-  .log-msg-ok { color: #22c55e; }
-  .log-msg-w { color: #f59e0b; }
-  .log-msg-err { color: #ef4444; }
+  .log-ok { color: #86efac; }
+  .log-err { color: #fca5a5; }
+  .log-i { color: #93c5fd; }
+  .log-w { color: #fcd34d; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--border2);
-    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; background: var(--card); color: var(--text2);
+  .preview-box {
+    background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius);
+    padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.7;
+    white-space: pre-wrap; min-height: 80px;
   }
-  .chip.on { background: var(--text); color: #fff; border-color: var(--text); }
 
-  #next-timer { font-size: 12px; font-weight: 600; color: var(--info-text); background: var(--info-bg); padding: 4px 12px; border-radius: 12px; display: inline-block; margin-top: 8px; }
+  .features-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13px; color: var(--text2); }
+  .features-list div::before { content: '✓ '; color: var(--success-text); font-weight: 600; }
+
+  .btn-row { display: flex; gap: 10px; align-items: center; }
+  .btn-row button { flex: 1; }
+
+  .section-sep { display: flex; align-items: center; gap: 10px; margin: 1.25rem 0; }
+  .section-sep span { font-size: 12px; color: var(--text3); white-space: nowrap; }
+  .section-sep::before, .section-sep::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+
+  @media (max-width: 600px) {
+    .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .features-list { grid-template-columns: 1fr; }
+    .container { padding: 1rem; }
+  }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-    Minha Manicure
+  <div class="topbar-logo">Buscador de Contatos</div>
+  <div class="topbar-sub">Google Places + WhatsApp via Z-API</div>
+  <div class="topbar-status">
+    <div class="status-dot" id="top-dot"></div>
+    <span id="top-status">Aguardando</span>
   </div>
-  <div class="topbar-sub">Prospecção v1.0</div>
-  <div class="topbar-status"><div class="status-dot" id="top-dot"></div><span id="top-status">Aguardando</span></div>
 </div>
 
 <div class="container">
-  <div class="card">
-    <div class="card-title">1. Autenticação e APIs</div>
-    <div class="grid2">
-      <div class="field"><label>Claude API Key</label><input type="password" id="claudekey" placeholder="sk-ant-..."></div>
-      <div class="field"><label>Google Maps Key</label><input type="password" id="gkey" placeholder="AIzaSy..."></div>
-    </div>
-    <div class="grid3">
-      <div class="field"><label>Z-API ID</label><input type="text" id="zid"></div>
-      <div class="field"><label>Instance Token</label><input type="password" id="ztoken"></div>
-      <div class="field"><label>Client Token</label><input type="password" id="zclient"></div>
-    </div>
-    <button class="primary" style="width:100%" onclick="saveConfig()">Salvar Configurações</button>
+
+  <div class="step-bar">
+    <div class="step active" id="s1"><div class="step-dot">1</div>APIs</div>
+    <div class="sep"></div>
+    <div class="step" id="s2"><div class="step-dot">2</div>Buscar</div>
+    <div class="sep"></div>
+    <div class="step" id="s3"><div class="step-dot">3</div>Mensagem</div>
+    <div class="sep"></div>
+    <div class="step" id="s4"><div class="step-dot">4</div>Disparo</div>
   </div>
 
   <div class="card">
-    <div class="card-title">2. Critérios de Busca</div>
-    <div class="grid2">
-      <div class="field"><label>O que buscar?</label><input type="text" id="termo" value="Manicure"></div>
-      <div class="field"><label>Bairro</label><input type="text" id="bairro" placeholder="Ex: Aldeota"></div>
+    <div class="card-title">Configurações das APIs <span class="tag">Passo 1</span></div>
+
+    <div class="grid2" style="margin-bottom:14px">
+      <div>
+        <label>Chave Google Places API</label>
+        <input type="password" id="gkey" placeholder="AIzaSy...">
+        <div class="hint">console.cloud.google.com → Credenciais</div>
+      </div>
+      <div>
+        <label>Claude API Key</label>
+        <input type="password" id="claudekey" placeholder="sk-ant-...">
+        <div class="hint">console.anthropic.com → API Keys</div>
+      </div>
     </div>
-    <div class="grid2">
-      <div class="field"><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
-      <div class="field"><label>Estado (UF)</label><input type="text" id="estado" value="CE"></div>
+
+    <div class="section-sep"><span>Z-API — WhatsApp</span></div>
+
+    <div class="grid3" style="margin-bottom:14px">
+      <div>
+        <label>Instance ID</label>
+        <input type="text" id="z-instance-id" placeholder="ex: 3DF2A1B...">
+        <div class="hint">Painel Z-API → instância → editar</div>
+      </div>
+      <div>
+        <label>Instance Token</label>
+        <input type="password" id="z-instance-token" placeholder="token da instância">
+        <div class="hint">Painel Z-API → instância → editar</div>
+      </div>
+      <div>
+        <label>Client Token</label>
+        <input type="password" id="z-client-token" placeholder="token da conta">
+        <div class="hint">app.z-api.io/app/security</div>
+      </div>
     </div>
-    <button class="primary" style="width:100%" onclick="executarBusca()" id="btn-busca">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      Buscar Profissionais
-    </button>
+
+    <button class="primary" onclick="saveConfig()" style="width:100%">Salvar configurações e continuar →</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Busca de contatos <span class="tag">Passo 2</span></div>
+
+    <div style="margin-bottom:14px">
+      <label>Tipo de serviço</label>
+      <input type="text" id="termo" placeholder="ex: manicure, cabeleireira, restaurante, dentista, academia...">
+      <div class="chips">
+        <span class="chip" onclick="setTermo(this)">Manicure</span>
+        <span class="chip" onclick="setTermo(this)">Cabeleireira</span>
+        <span class="chip" onclick="setTermo(this)">Restaurante</span>
+        <span class="chip" onclick="setTermo(this)">Dentista</span>
+        <span class="chip" onclick="setTermo(this)">Academia</span>
+        <span class="chip" onclick="setTermo(this)">Farmácia</span>
+        <span class="chip" onclick="setTermo(this)">Padaria</span>
+        <span class="chip" onclick="setTermo(this)">Oficina mecânica</span>
+        <span class="chip" onclick="setTermo(this)">Clínica estética</span>
+        <span class="chip" onclick="setTermo(this)">Barbearia</span>
+        <span class="chip" onclick="setTermo(this)">Pet shop</span>
+        <span class="chip" onclick="setTermo(this)">Psicólogo</span>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-bottom:14px">
+      <div>
+        <label>Bairro (opcional)</label>
+        <input type="text" id="bairro" placeholder="ex: Aldeota">
+      </div>
+      <div>
+        <label>Cidade</label>
+        <input type="text" id="cidade" placeholder="ex: Fortaleza">
+      </div>
+      <div>
+        <label>Estado</label>
+        <input type="text" id="estado" placeholder="ex: Ceará">
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-bottom:14px">
+      <div>
+        <label>Máximo de resultados</label>
+        <select id="maxres">
+          <option value="20">20 contatos</option>
+          <option value="40">40 contatos</option>
+          <option value="60" selected>60 contatos</option>
+        </select>
+      </div>
+      <div>
+        <label>Avaliação mínima</label>
+        <select id="minrating">
+          <option value="0">Qualquer avaliação</option>
+          <option value="3">3+ estrelas</option>
+          <option value="4">4+ estrelas</option>
+          <option value="4.5">4.5+ estrelas</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="primary" onclick="buscar()" id="btn-buscar" style="width:100%">Buscar contatos →</button>
   </div>
 
   <div class="metrics">
-    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">Total</div></div>
-    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">C/ Zap</div></div>
-    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">Enviados</div></div>
-    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">Pendentes</div></div>
+    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">encontrados</div></div>
+    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">com telefone</div></div>
+    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">enviadas hoje</div></div>
+    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">na fila</div></div>
   </div>
 
   <div class="card" id="panel-results" style="display:none">
-    <div class="card-title" style="margin-bottom:1rem">
-      3. Resultados
-      <button onclick="exportCSV()" style="margin-left:auto; font-size:11px; padding:4px 10px">Exportar CSV</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+      <div class="card-title" style="margin:0">Contatos encontrados</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportCSV()" style="font-size:12px;padding:6px 12px">Exportar CSV</button>
+        <button onclick="selecionarTodos()" style="font-size:12px;padding:6px 12px">Selecionar todos</button>
+        <button onclick="desmarcarTodos()" style="font-size:12px;padding:6px 12px">Desmarcar todos</button>
+      </div>
     </div>
-    <div class="table-container">
-      <table id="table-contatos">
-        <thead>
-          <tr>
-            <th style="width:40px; text-align:center"><input type="checkbox" checked onclick="toggleAll(this)"></th>
-            <th>Nome</th>
-            <th style="width:140px">Telefone</th>
-            <th style="width:100px">Status</th>
-          </tr>
-        </thead>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th style="width:36px"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+          <th style="width:28%">Nome</th>
+          <th style="width:16%">Telefone</th>
+          <th style="width:9%">Aval.</th>
+          <th style="width:32%">Endereço</th>
+          <th style="width:13%">Status</th>
+        </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
 
-  <div class="card" id="panel-disparo" style="display:none">
-    <div class="card-title">4. Sequência de Envio</div>
-    <div class="field">
-      <label>Mensagem Base (Use {nome} e {cidade})</label>
-      <textarea id="msg-base" rows="3">Olá {nome}, tudo bem? Vi seu trabalho como manicure em {cidade} e gostaria de apresentar o app Minha Manicure.</textarea>
-    </div>
-    
-    <div class="grid3">
-      <div class="field"><label>Intervalo (seg)</label><input type="number" id="intervalo" value="60"></div>
-      <div class="field"><label>Janela: Início</label><input type="time" id="h-ini" value="08:00"></div>
-      <div class="field"><label>Janela: Fim</label><input type="time" id="h-fim" value="19:00"></div>
+  <div class="card" id="panel-msg" style="display:none">
+    <div class="card-title">Mensagem <span class="tag">Passo 3</span></div>
+
+    <div style="margin-bottom:14px">
+      <label>Mensagem base — a IA vai adaptar para cada contato automaticamente</label>
+      <textarea id="msg-base" rows="5" style="resize:vertical">Olá! Vi que vocês oferecem serviços de {termo} em {cidade}. Gostaria de saber mais sobre os serviços e valores. Pode me ajudar?</textarea>
+      <div class="hint">Variáveis: {nome} {termo} {cidade} {bairro} — a IA enriquece o restante sozinha.</div>
     </div>
 
-    <div class="field">
-      <label>Dias Permitidos</label>
-      <div class="chips" id="dias-lista">
-        <div class="chip on" data-dia="1">Seg</div>
-        <div class="chip on" data-dia="2">Ter</div>
-        <div class="chip on" data-dia="3">Qua</div>
-        <div class="chip on" data-dia="4">Qui</div>
-        <div class="chip on" data-dia="5">Sex</div>
-        <div class="chip on" data-dia="6">Sab</div>
-        <div class="chip" data-dia="0">Dom</div>
+    <div class="divider"></div>
+
+    <label style="margin-bottom:10px">O que a IA faz automaticamente em cada mensagem</label>
+    <div class="features-list" style="margin-bottom:1.25rem">
+      <div>Varia palavras mantendo o contexto</div>
+      <div>Saudação por horário (bom dia / boa tarde / boa noite)</div>
+      <div>Conexão pela cidade do DDD do telefone</div>
+      <div>Emojis variados por mensagem</div>
+      <div>Extrai primeiro nome do estabelecimento</div>
+      <div>Tom natural, não parece robô</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="margin-bottom:10px">
+      <label>Preview — como ficará a próxima mensagem gerada pela IA</label>
+      <div class="preview-box" id="preview-box">Clique em "Gerar preview" para ver um exemplo com IA...</div>
+    </div>
+    <button onclick="gerarPreview()" id="btn-preview">Gerar preview com IA ↗</button>
+  </div>
+
+  <div class="card" id="panel-disparo" style="display:none">
+    <div class="card-title">Configurações de disparo <span class="tag">Passo 4</span></div>
+
+    <div class="grid4" style="margin-bottom:1.25rem">
+      <div>
+        <label>Intervalo entre envios</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="intervalo" value="60" min="10" max="3600">
+          <span style="font-size:13px;color:var(--text2);white-space:nowrap">seg</span>
+        </div>
+        <div class="hint">Mínimo recomendado: 30s</div>
+      </div>
+      <div>
+        <label>Limite diário de segurança</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="limite-dia" value="50" min="1" max="500">
+          <span style="font-size:13px;color:var(--text2);white-space:nowrap">msgs</span>
+        </div>
+        <div class="hint">Recomendado: até 50/dia</div>
+      </div>
+      <div>
+        <label>Horário de início (Brasília)</label>
+        <input type="time" id="hora-inicio" value="08:00">
+      </div>
+      <div>
+        <label>Horário de fim (Brasília)</label>
+        <input type="time" id="hora-fim" value="20:00">
       </div>
     </div>
 
-    <div class="grid3" style="margin-top:10px">
-      <button class="primary" onclick="iniciarSequencia()" id="btn-iniciar">Iniciar</button>
-      <button onclick="pausarDisparo()" id="btn-pausar" disabled>Pausar</button>
-      <button onclick="pararDisparo()" id="btn-parar" disabled>Parar</button>
+    <div style="margin-bottom:1.25rem">
+      <label style="margin-bottom:10px">Dias permitidos para envio</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <button class="day-btn on" data-day="1" onclick="toggleDay(this)">Segunda</button>
+        <button class="day-btn on" data-day="2" onclick="toggleDay(this)">Terça</button>
+        <button class="day-btn on" data-day="3" onclick="toggleDay(this)">Quarta</button>
+        <button class="day-btn on" data-day="4" onclick="toggleDay(this)">Quinta</button>
+        <button class="day-btn on" data-day="5" onclick="toggleDay(this)">Sexta</button>
+        <button class="day-btn" data-day="6" onclick="toggleDay(this)">Sábado</button>
+        <button class="day-btn" data-day="0" onclick="toggleDay(this)">Domingo</button>
+      </div>
     </div>
-    <div style="text-align:center"><div id="next-timer" style="display:none"></div></div>
+
+    <div class="divider"></div>
+
+    <div class="status-bar">
+      <div class="status-dot stopped" id="status-dot"></div>
+      <div class="status-info">
+        <div class="status-title" id="status-txt">Aguardando início</div>
+        <div class="status-sub" id="status-sub">Configure e clique em iniciar disparo</div>
+      </div>
+      <div class="status-timer" id="next-timer"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" onclick="iniciarDisparo()" id="btn-iniciar">Iniciar disparo →</button>
+      <button onclick="pausarDisparo()" id="btn-pausar" disabled>Pausar</button>
+      <button class="danger" onclick="pararDisparo()" id="btn-parar" disabled>Parar</button>
+    </div>
   </div>
 
-  <div id="log-box"></div>
+  <div style="margin-top:1.25rem">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500">Log de atividade</div>
+    <div id="log-box"><span style="color:#555">Aguardando ações...</span></div>
+  </div>
+
 </div>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbSmfsgUVtmR9FbDIdMeX4lePOl138GXQ
-&libraries=places"></script>
-
 <script>
-let contatos = [], enviados = 0, rodando = false, pausado = false;
-let disparoTimer, countdownTimer, config = {};
+let contatos = [], config = {}, enviados = 0, filaIdx = 0;
+let disparoTimer = null, countdownTimer = null, pausado = false, rodando = false;
+let diasAtivos = new Set([1,2,3,4,5]);
 
-// Inicialização dos chips de dias
-document.querySelectorAll('.chip').forEach(c => {
-  c.onclick = () => c.classList.toggle('on');
-});
-
+// ── LOG ──────────────────────────────────────────
 function log(msg, tipo) {
-  const box = document.getElementById('log-box');
+  const b = document.getElementById('log-box');
+  const cls = tipo==='ok'?'log-ok':tipo==='err'?'log-err':tipo==='w'?'log-w':'log-i';
+  const t = new Date().toLocaleTimeString('pt-BR');
   const line = document.createElement('div');
-  line.className = 'log-line';
-  line.innerHTML = `<span class="log-ts">${new Date().toLocaleTimeString()}</span><span class="log-msg-${tipo}">${msg}</span>`;
-  box.appendChild(line);
-  box.scrollTop = box.scrollHeight;
+  line.className = cls;
+  line.textContent = `[${t}] ${msg}`;
+  b.appendChild(line);
+  b.scrollTop = b.scrollHeight;
 }
 
-function setStatus(txt, css) {
-  document.getElementById('top-status').textContent = txt;
-  document.getElementById('top-dot').className = 'status-dot ' + css;
-}
-
+// ── CONFIG ───────────────────────────────────────
 function saveConfig() {
-  config = {
-    claudekey: document.getElementById('claudekey').value,
-    zid: document.getElementById('zid').value,
-    ztoken: document.getElementById('ztoken').value,
-    zclient: document.getElementById('zclient').value
-  };
-  log("Configurações salvas localmente.", "ok");
+  config.gkey = document.getElementById('gkey').value.trim();
+  config.claudekey = document.getElementById('claudekey').value.trim();
+  config.instanceId = document.getElementById('z-instance-id').value.trim();
+  config.instanceToken = document.getElementById('z-instance-token').value.trim();
+  config.clientToken = document.getElementById('z-client-token').value.trim();
+  
+  if (!config.gkey || !config.claudekey || !config.instanceId || !config.instanceToken || !config.clientToken) {
+    log('Preencha todos os campos de configuração antes de continuar.', 'err'); return;
+  }
+  log('Configurações salvas com sucesso.', 'ok');
+  setStep(2);
 }
 
-function executarBusca() {
-  const termo = document.getElementById('termo').value;
-  const bairro = document.getElementById('bairro').value;
-  const cidade = document.getElementById('cidade').value;
-  const estado = document.getElementById('estado').value;
-  const local = `${bairro} ${cidade} ${estado}`.trim();
-  
-  if(!termo || !cidade) { log("Preencha o serviço e a cidade.", "err"); return; }
-  
-  log(`Geolocalizando: ${local}...`, "i");
-  const service = new google.maps.places.PlacesService(document.createElement('div'));
-  const geocoder = new google.maps.Geocoder();
+// ── STEPS ────────────────────────────────────────
+function setStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById('s'+i);
+    s.className = 'step'+(i<n?' done':i===n?' active':'');
+    s.querySelector('.step-dot').textContent = i<n?'✓':i;
+  }
+}
 
-  geocoder.geocode({ address: local }, (results, status) => {
-    if (status !== 'OK') { log("Erro no endereço: " + status, "err"); return; }
+// ── CHIPS ────────────────────────────────────────
+function setTermo(el) {
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('termo').value = el.textContent;
+}
+
+function toggleDay(el) {
+  const d = parseInt(el.dataset.day);
+  if (diasAtivos.has(d)) { diasAtivos.delete(d); el.classList.remove('on'); }
+  else { diasAtivos.add(d); el.classList.add('on'); }
+}
+
+// ── HORÁRIO / JANELA ──────────────────────────────
+function horarioBrasilia() {
+  return new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Sao_Paulo'}));
+}
+
+function dentroJanela() {
+  const agora = horarioBrasilia();
+  if (!diasAtivos.has(agora.getDay())) return false;
+  const hI = document.getElementById('hora-inicio').value.split(':').map(Number);
+  const hF = document.getElementById('hora-fim').value.split(':').map(Number);
+  const min = agora.getHours()*60+agora.getMinutes();
+  return min >= (hI[0]*60+hI[1]) && min < (hF[0]*60+hF[1]);
+}
+
+function saudacaoPorHorario() {
+  const h = horarioBrasilia().getHours();
+  if (h>=5 && h<12) return 'Bom dia';
+  if (h>=12 && h<18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
+// ── HELPERS IA ────────────────────────────────────
+function extrairPrimeiroNome(nome) {
+  const stop = ['salao','salon','studio','clinica','barbearia','espaco','centro','de','da','do','e','beauty','hair','nail'];
+  const partes = nome.split(/[\s,\-&]+/);
+  const filtrado = partes.filter(p=>p.length>2 && !stop.includes(p.toLowerCase()));
+  return filtrado[0]||partes[0]||nome;
+}
+
+function dddParaCidade(telefone) {
+  const ddd = (telefone||"").replace(/\D/g,'').substring(0,2);
+  const mapa = {'11':'São Paulo','21':'Rio de Janeiro','31':'Belo Horizonte','41':'Curitiba','51':'Porto Alegre','61':'Brasília','71':'Salvador','81':'Recife','85':'Fortaleza'};
+  return mapa[ddd]||null;
+}
+
+// ── BUSCA GOOGLE ──────────────────────────────────
+async function buscar() {
+  const termo = document.getElementById('termo').value.trim();
+  const cidade = document.getElementById('cidade').value.trim();
+  const maxres = parseInt(document.getElementById('maxres').value);
+  const minrating = parseFloat(document.getElementById('minrating').value);
+
+  if (!config.gkey) { log('Salve as configurações primeiro.', 'err'); return; }
+  if (!termo || !cidade) { log('Preencha termo e cidade.', 'err'); return; }
+
+  const btn = document.getElementById('btn-buscar');
+  btn.textContent = 'Buscando...'; btn.disabled = true;
+  log(`Iniciando busca por "${termo}" em ${cidade}`, 'i');
+
+  try {
+    const query = `${termo} em ${cidade}`;
+    const geoResp = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${config.gkey}`);
+    const geoData = await geoResp.json();
+    if (!geoData.results?.[0]) throw new Error("Local não encontrado.");
     
-    log("Iniciando varredura no Google Places...", "i");
-    const request = {
-      location: results[0].geometry.location,
-      radius: '5000',
-      keyword: termo
-    };
+    const loc = geoData.results[0].geometry.location;
+    let allPlaces = [], pageToken = null;
 
-    service.nearbySearch(request, (places, statusNearby) => {
-      if (statusNearby !== 'OK') { log("Nenhum local encontrado.", "err"); return; }
-      
-      contatos = [];
-      let count = 0;
-      places.forEach(p => {
-        service.getDetails({ placeId: p.place_id, fields: ['name', 'formatted_phone_number', 'rating', 'vicinity'] }, (details, s) => {
-          if (s === 'OK') {
-            contatos.push({
-              id: p.place_id,
-              nome: details.name,
-              telefone: details.formatted_phone_number || '',
-              rating: details.rating || 0,
-              endereco: details.vicinity || '',
-              status: details.formatted_phone_number ? 'Pendente' : 'Sem WhatsApp',
-              selecionado: !!details.formatted_phone_number
-            });
-            count++;
-            if(count === places.length) {
-              renderTabela();
-              document.getElementById('panel-results').style.display = 'block';
-              document.getElementById('panel-disparo').style.display = 'block';
-              log(`Busca concluída. ${contatos.length} resultados processados.`, "ok");
-            }
-          }
-        });
+    do {
+      let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${loc.lat},${loc.lng}&radius=5000&keyword=${encodeURIComponent(termo)}&key=${config.gkey}&language=pt-BR`;
+      if (pageToken) url += `&pagetoken=${pageToken}`;
+      const pResp = await fetch(url);
+      const pData = await pResp.json();
+      allPlaces = allPlaces.concat(pData.results || []);
+      pageToken = pData.next_page_token;
+      if (pageToken && allPlaces.length < maxres) await new Promise(r=>setTimeout(r, 2000));
+    } while (pageToken && allPlaces.length < maxres);
+
+    allPlaces = allPlaces.filter(p => (p.rating||0) >= minrating).slice(0, maxres);
+    log(`Encontrados ${allPlaces.length} locais. Buscando telefones...`, 'ok');
+
+    contatos = [];
+    for (let i=0; i<allPlaces.length; i++) {
+      const p = allPlaces[i];
+      const dResp = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?place_id=${p.place_id}&fields=name,formatted_phone_number,formatted_address,rating&key=${config.gkey}`);
+      const dData = await dResp.json();
+      const res = dData.result || {};
+      contatos.push({
+        id: p.place_id,
+        nome: res.name || p.name,
+        telefone: res.formatted_phone_number || "",
+        endereco: res.formatted_address || "",
+        rating: res.rating || p.rating || 0,
+        status: 'pendente',
+        selecionado: !!res.formatted_phone_number
       });
-    });
+    }
+
+    renderTabela();
+    atualizarMetricas();
+    document.getElementById('panel-results').style.display='block';
+    document.getElementById('panel-msg').style.display='block';
+    document.getElementById('panel-disparo').style.display='block';
+    setStep(3);
+    log('Busca concluída.', 'ok');
+  } catch(e) { log('Erro na busca: '+e.message, 'err'); }
+  btn.textContent = 'Buscar contatos →'; btn.disabled = false;
+}
+
+// ── DISPARO E Z-API ───────────────────────────────
+async function enviarWhatsApp(phone, text) {
+  const cleanPhone = phone.replace(/\D/g,'');
+  const url = `https://api.z-api.io/instances/${config.instanceId}/token/${config.instanceToken}/send-text`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Client-Token': config.clientToken },
+    body: JSON.stringify({ phone: cleanPhone, message: text })
   });
+  return resp.ok;
 }
 
-function renderTabela() {
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = contatos.map((c, i) => `
-    <tr>
-      <td style="text-align:center"><input type="checkbox" ${c.selecionado ? 'checked' : ''} onchange="contatos[${i}].selecionado = this.checked; updateMetrics()"></td>
-      <td>${c.nome}</td>
-      <td>${c.telefone || '—'}</td>
-      <td><span class="badge badge-${c.status === 'Enviado' ? 'sent' : c.status === 'Erro' ? 'error' : 'pending'}">${c.status}</span></td>
-    </tr>
-  `).join('');
-  updateMetrics();
-}
-
-function updateMetrics() {
-  document.getElementById('m-total').textContent = contatos.length;
-  document.getElementById('m-phone').textContent = contatos.filter(c => c.telefone).length;
-  document.getElementById('m-sent').textContent = enviados;
-  document.getElementById('m-pending').textContent = contatos.filter(c => c.selecionado && c.status === 'Pendente').length;
-}
-
-function toggleAll(el) {
-  contatos.forEach(c => { if(c.telefone) c.selecionado = el.checked; });
-  renderTabela();
-}
-
-async function iniciarSequencia() {
-  if (rodando && !pausado) return;
+async function gerarMensagemIA(contato, msgBase, termo, cidade) {
+  const prompt = `Reescreva esta mensagem para WhatsApp de forma natural: "${msgBase.replace('{nome}', contato.nome).replace('{termo}', termo).replace('{cidade}', cidade)}". 
+  Use saudação de "${saudacaoPorHorario()}", emojis leves e tom amigável.`;
   
-  const fila = contatos.filter(c => c.selecionado && c.status === 'Pendente');
-  if (fila.length === 0) { log("Nenhum contato pendente selecionado.", "w"); return; }
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': config.claudekey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-3-5-sonnet-20240620', max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
+  });
+  const data = await resp.json();
+  return data.content?.[0]?.text || msgBase;
+}
 
+async function processarProximo() {
+  if (!rodando || pausado) return;
+  if (!dentroJanela()) { 
+    log('Fora do horário ou dia permitido. Aguardando...', 'w');
+    setStatus('Aguardando Janela', 'O disparo continuará automaticamente no horário configurado', 'paused');
+    disparoTimer = setTimeout(processarProximo, 60000);
+    return;
+  }
+
+  const fila = contatos.filter((c, i) => i >= filaIdx && c.selecionado && c.status === 'pendente');
+  if (!fila.length || enviados >= parseInt(document.getElementById('limite-dia').value)) {
+    pararDisparo();
+    log('Disparo finalizado ou limite atingido.', 'ok');
+    return;
+  }
+
+  const contato = fila[0];
+  const originalIdx = contatos.findIndex(c => c.id === contato.id);
+  
+  try {
+    setStatus('Gerando Mensagem', `IA criando texto para ${contato.nome}...`, 'running');
+    const msg = await gerarMensagemIA(contato, document.getElementById('msg-base').value, document.getElementById('termo').value, document.getElementById('cidade').value);
+    
+    setStatus('Enviando', `Z-API enviando para ${contato.telefone}...`, 'running');
+    const ok = await enviarWhatsApp(contato.telefone, msg);
+    
+    if (ok) {
+      contatos[originalIdx].status = 'enviado';
+      enviados++;
+      log(`Sucesso: ${contato.nome}`, 'ok');
+    } else {
+      throw new Error("Erro Z-API");
+    }
+  } catch(e) {
+    contatos[originalIdx].status = 'erro';
+    log(`Falha em ${contato.nome}: ${e.message}`, 'err');
+  }
+
+  filaIdx = originalIdx + 1;
+  renderTabela();
+  atualizarMetricas();
+  agendarProximo();
+}
+
+function agendarProximo() {
+  let seg = parseInt(document.getElementById('intervalo').value);
+  setStatus('Aguardando', `Próximo envio em ${seg}s`, 'running');
+  
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    seg--;
+    document.getElementById('next-timer').textContent = `Próximo: ${seg}s`;
+    if (seg <= 0) clearInterval(countdownTimer);
+  }, 1000);
+
+  disparoTimer = setTimeout(processarProximo, seg * 1000);
+}
+
+// ── INTERFACE ─────────────────────────────────────
+function renderTabela() {
+  document.getElementById('tbody').innerHTML = contatos.map((c,i)=>`
+    <tr>
+      <td><input type="checkbox" ${c.selecionado?'checked':''} onchange="toggleItem(${i},this)" ${!c.telefone?'disabled':''}></td>
+      <td style="font-weight:500;">${c.nome}</td>
+      <td>${c.telefone || '---'}</td>
+      <td>★${c.rating}</td>
+      <td>${c.endereco}</td>
+      <td><span class="badge ${c.status==='enviado'?'badge-ok':c.status==='erro'?'badge-err':'badge-i'}">${c.status}</span></td>
+    </tr>`).join('');
+}
+
+function setStatus(tit, sub, dot) {
+  document.getElementById('status-txt').textContent = tit;
+  document.getElementById('status-sub').textContent = sub;
+  document.getElementById('status-dot').className = 'status-dot ' + dot;
+}
+
+function atualizarMetricas() {
+  document.getElementById('m-total').textContent = contatos.length;
+  document.getElementById('m-phone').textContent = contatos.filter(c=>c.telefone).length;
+  document.getElementById('m-sent').textContent = enviados;
+  document.getElementById('m-pending').textContent = contatos.filter(c=>c.selecionado && c.status==='pendente').length;
+}
+
+function toggleItem(i, el) { contatos[i].selecionado = el.checked; atualizarMetricas(); }
+function selecionarTodos() { contatos.forEach(c => { if(c.telefone) c.selecionado = true; }); renderTabela(); atualizarMetricas(); }
+function desmarcarTodos() { contatos.forEach(c => c.selecionado = false); renderTabela(); atualizarMetricas(); }
+
+function iniciarDisparo() {
+  if (!config.instanceId) { log('Configure as APIs primeiro.', 'err'); return; }
   rodando = true; pausado = false;
   document.getElementById('btn-iniciar').disabled = true;
   document.getElementById('btn-pausar').disabled = false;
   document.getElementById('btn-parar').disabled = false;
-  document.getElementById('btn-pausar').textContent = 'Pausar';
-  setStatus('Rodando', 'running');
-  
-  processarFila();
-}
-
-async function processarFila() {
-  if (!rodando || pausado) return;
-
-  // Verificar Janela de Horário e Dias
-  const agora = new Date();
-  const hIni = document.getElementById('h-ini').value;
-  const hFim = document.getElementById('h-fim').value;
-  const diasOn = Array.from(document.querySelectorAll('#dias-lista .chip.on')).map(c => parseInt(c.dataset.dia));
-  
-  const horaAtual = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
-  
-  if (!diasOn.includes(agora.getDay()) || horaAtual < hIni || horaAtual > hFim) {
-    log("Fora da janela de horário/dia permitida. Aguardando 1 minuto...", "w");
-    disparoTimer = setTimeout(processarFila, 60000);
-    return;
-  }
-
-  const proximo = contatos.find(c => c.selecionado && c.status === 'Pendente');
-  
-  if (!proximo) {
-    log("Fila de disparos concluída com sucesso.", "ok");
-    pararDisparo();
-    return;
-  }
-
-  try {
-    log(`Enviando para: ${proximo.nome}...`, "i");
-    // Simulação de chamada Claude + Z-API
-    await new Promise(r => setTimeout(r, 2000)); 
-    
-    proximo.status = 'Enviado';
-    enviados++;
-    renderTabela();
-    
-    const seg = parseInt(document.getElementById('intervalo').value);
-    iniciarCountdown(seg);
-    disparoTimer = setTimeout(processarFila, seg * 1000);
-    
-  } catch (err) {
-    log(`Erro ao enviar para ${proximo.nome}: ${err.message}`, "err");
-    proximo.status = 'Erro';
-    renderTabela();
-    disparoTimer = setTimeout(processarFila, 5000);
-  }
-}
-
-function iniciarCountdown(s) {
-  const el = document.getElementById('next-timer');
-  el.style.display = 'inline-block';
-  let timeLeft = s;
-  
-  clearInterval(countdownTimer);
-  countdownTimer = setInterval(() => {
-    timeLeft--;
-    el.textContent = `Próximo disparo em ${timeLeft}s`;
-    if (timeLeft <= 0) {
-      clearInterval(countdownTimer);
-      el.style.display = 'none';
-    }
-  }, 1000);
+  log('Iniciando sequência de disparos...', 'i');
+  processarProximo();
 }
 
 function pausarDisparo() {
   pausado = !pausado;
   document.getElementById('btn-pausar').textContent = pausado ? 'Retomar' : 'Pausar';
-  if (pausado) {
-    clearTimeout(disparoTimer);
-    clearInterval(countdownTimer);
-    setStatus('Pausado', 'paused');
-    log("Sequência pausada pelo usuário.", "w");
-  } else {
-    log("Retomando sequência...", "i");
-    iniciarSequencia();
-  }
+  if (!pausado) processarProximo();
+  else { clearTimeout(disparoTimer); log('Disparo pausado.', 'w'); }
 }
 
 function pararDisparo() {
-  rodando = false; pausado = false;
+  rodando = false;
   clearTimeout(disparoTimer);
   clearInterval(countdownTimer);
   document.getElementById('btn-iniciar').disabled = false;
   document.getElementById('btn-pausar').disabled = true;
   document.getElementById('btn-parar').disabled = true;
-  document.getElementById('next-timer').style.display = 'none';
-  setStatus('Aguardando', '');
-  log("Sequência encerrada.", "w");
+  setStatus('Parado', 'Disparo encerrado pelo usuário', 'stopped');
 }
 
-function exportCSV() {
-  const rows = [['Nome', 'Telefone', 'Endereço', 'Avaliação', 'Status']];
-  contatos.forEach(c => rows.push([c.nome, c.telefone, c.endereco, c.rating, c.status]));
-  const csvContent = rows.map(e => e.join(",")).join("\n");
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "prospeccao_manicure.csv";
-  link.click();
+async function gerarPreview() {
+  const sel = contatos.find(c => c.selecionado && c.telefone);
+  if (!sel) { log('Selecione um contato com telefone para o preview.', 'w'); return; }
+  document.getElementById('preview-box').textContent = "Gerando...";
+  const msg = await gerarMensagemIA(sel, document.getElementById('msg-base').value, document.getElementById('termo').value, document.getElementById('cidade').value);
+  document.getElementById('preview-box').textContent = msg;
 }
 </script>
-
 </body>
 </html>
