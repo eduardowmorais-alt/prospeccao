@@ -1,75 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscador de Contatos — Minha Manicure</title>
-<style>
-  :root {
-    --bg: #f9f9f8; --bg2: #f0efea; --card: #ffffff; --border: rgba(0,0,0,0.12);
-    --text: #1a1a1a; --text2: #6b6b68; --radius: 8px; --radius-lg: 12px;
-    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); padding: 2rem; }
-  .container { max-width: 900px; margin: 0 auto; }
-  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
-  label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; }
-  input, select { width: 100%; padding: 10px; border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; font-size: 14px; }
-  button { width: 100%; padding: 12px; border-radius: var(--radius); border: none; background: #1a1a1a; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; }
-  button:hover { background: #333; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  button.n8n { background: #ff6b6b; margin-top: 20px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-  th, td { text-align: left; padding: 10px; border-bottom: 0.5px solid var(--border); }
-  #log-box { font-family: monospace; font-size: 12px; background: #1a1a1a; color: #86efac; padding: 15px; border-radius: var(--radius); margin-top: 10px; max-height: 150px; overflow-y: auto; }
-</style>
-</head>
-<body>
-
-<div class="container">
-  <div class="card">
-    <div style="font-weight: bold; margin-bottom: 15px;">1. CONFIGURAÇÕES INICIAIS</div>
-    <div class="grid">
-      <div><label>Chave Google Maps</label><input type="password" id="gkey" placeholder="AIza..."></div>
-      <div><label>URL Webhook n8n</label><input type="text" id="webhook" value="http://137.184.209.187:5678/webhook-test/buscar-manicure"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div style="font-weight: bold; margin-bottom: 15px;">2. FILTROS DE BUSCA</div>
-    <div class="grid">
-      <div><label>Serviço</label><input type="text" id="termo" value="Manicure"></div>
-      <div><label>Cidade</label><input type="text" id="cidade" value="Fortaleza"></div>
-      <div><label>Bairro</label><input type="text" id="bairro" value="Aldeota"></div>
-      <div>
-        <label>Quantidade</label>
-        <select id="maxres">
-          <option value="20">20 resultados</option>
-          <option value="40">40 resultados</option>
-          <option value="60">60 resultados</option>
-        </select>
-      </div>
-    </div>
-    <button id="btn-buscar" onclick="buscar()">BUSCAR CONTATOS NO GOOGLE</button>
-  </div>
-
-  <div class="card" id="painel-resultados" style="display:none">
-    <div style="font-weight: bold; margin-bottom: 10px;">RESULTADOS ENCONTRADOS: <span id="contador">0</span></div>
-    <table>
-      <thead><tr><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <button class="n8n" id="btn-n8n" onclick="enviarParaN8N()">🚀 ENVIAR TUDO PARA O N8N</button>
-  </div>
-
-  <div id="log-box">Aguardando início...</div>
-</div>
-
 <script>
 let contatos = [];
 let mapsService;
+
+// controle de paginação (NOVO)
+let isPaginating = false;
 
 function log(msg) {
   const box = document.getElementById('log-box');
@@ -87,15 +21,12 @@ async function buscar() {
   btn.disabled = true; 
   btn.innerText = "CARREGANDO MAPS...";
 
-  // Carregamento assíncrono (resolve o aviso de performance do console)
   if (typeof google === 'undefined') {
     const s = document.createElement('script');
-    // Adicionei 'async' e 'defer' para seguir a recomendação do Google
     s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&callback=initBusca`;
     s.async = true;
     s.defer = true;
-    
-    // Criamos uma função global temporária para o Google chamar quando terminar de carregar
+
     window.initBusca = () => executarBusca(max);
     document.head.appendChild(s);
   } else {
@@ -107,48 +38,80 @@ function executarBusca(maxres) {
   const termo = document.getElementById('termo').value;
   const cidade = document.getElementById('cidade').value;
   const bairro = document.getElementById('bairro').value;
+
   const query = `${termo} em ${bairro}, ${cidade}`;
-  
+
   log(`Buscando por: ${query}...`);
+
   contatos = [];
+  isPaginating = false;
+
   mapsService = new google.maps.places.PlacesService(document.createElement('div'));
 
   const callback = (results, status, pagination) => {
-    if (status === "OK") {
+
+    if (status === "OK" && results) {
+
       results.forEach(p => {
         if (!contatos.find(c => c.id === p.place_id)) {
-          contatos.push({ id: p.place_id, nome: p.name, telefone: 'Carregando...', status: 'Pendente' });
+          contatos.push({
+            id: p.place_id,
+            nome: p.name,
+            telefone: 'Carregando...',
+            status: 'Pendente'
+          });
         }
       });
 
       renderTabela();
 
-      if (pagination && pagination.hasNextPage && contatos.length < maxres) {
-        log(`Google autorizou mais resultados. Aguardando pausa de segurança...`);
-        setTimeout(() => pagination.nextPage(), 2200);
+      const hasMore = pagination && pagination.hasNextPage;
+      const stillNeeded = contatos.length < maxres;
+
+      if (hasMore && stillNeeded && !isPaginating) {
+
+        isPaginating = true;
+
+        log(`Mais resultados disponíveis... aguardando Google liberar próxima página`);
+
+        const next = pagination.nextPage;
+
+        setTimeout(() => {
+          isPaginating = false;
+          next();
+        }, 2300);
+
       } else {
-        log(`Busca de locais finalizada. Coletando telefones...`);
+        log(`Busca finalizada. Iniciando coleta de telefones...`);
         extrairTelefones();
         document.getElementById('btn-buscar').disabled = false;
         document.getElementById('btn-buscar').innerText = "BUSCAR CONTATOS NO GOOGLE";
       }
     }
+
+    if (status !== "OK") {
+      log("Erro na busca Google Places: " + status);
+      document.getElementById('btn-buscar').disabled = false;
+    }
   };
 
-  mapsService.textSearch({ query: query }, callback);
+  mapsService.textSearch({ query }, callback);
 }
 
 function extrairTelefones() {
   contatos.forEach((c, i) => {
     setTimeout(() => {
-      mapsService.getDetails({ placeId: c.id, fields: ['formatted_phone_number'] }, (place, status) => {
-        if (status === "OK" && place) {
-          contatos[i].telefone = place.formatted_phone_number || "Sem Telefone";
-        } else {
-          contatos[i].telefone = "Não listado";
+      mapsService.getDetails(
+        { placeId: c.id, fields: ['formatted_phone_number'] },
+        (place, status) => {
+          if (status === "OK" && place) {
+            contatos[i].telefone = place.formatted_phone_number || "Sem Telefone";
+          } else {
+            contatos[i].telefone = "Não listado";
+          }
+          renderTabela();
         }
-        renderTabela();
-      });
+      );
     }, i * 400);
   });
 }
@@ -157,18 +120,28 @@ function renderTabela() {
   const tbody = document.getElementById('tbody');
   document.getElementById('painel-resultados').style.display = 'block';
   document.getElementById('contador').innerText = contatos.length;
-  tbody.innerHTML = contatos.map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.status}</td></tr>`).join('');
+
+  tbody.innerHTML = contatos
+    .map(c => `<tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.status}</td></tr>`)
+    .join('');
 }
 
 async function enviarParaN8N() {
   const url = document.getElementById('webhook').value;
   const btn = document.getElementById('btn-n8n');
-  const validos = contatos.filter(c => c.telefone !== "Sem Telefone" && c.telefone !== "Carregando..." && c.telefone !== "Não listado");
+
+  const validos = contatos.filter(c =>
+    c.telefone !== "Sem Telefone" &&
+    c.telefone !== "Carregando..." &&
+    c.telefone !== "Não listado"
+  );
 
   if(validos.length === 0) return alert("Nenhum contato válido para enviar.");
 
-  btn.disabled = true; btn.innerText = "ENVIANDO...";
-  log(`Enviando lista de ${validos.length} contatos para o n8n...`);
+  btn.disabled = true;
+  btn.innerText = "ENVIANDO...";
+
+  log(`Enviando ${validos.length} contatos para n8n...`);
 
   try {
     const response = await fetch(url, {
@@ -177,13 +150,13 @@ async function enviarParaN8N() {
       body: JSON.stringify({ contatos: validos })
     });
 
-    if(response.ok) alert("🚀 SUCESSO! O n8n recebeu a lista.");
-    else alert("O n8n respondeu com erro. Verifique se o Webhook está como POST.");
+    if(response.ok) alert("SUCESSO! Enviado para n8n.");
+    else alert("Erro no webhook n8n.");
   } catch (e) {
-    alert("Erro de conexão. Lembre-se de permitir 'Conteúdo Inseguro' no navegador se o n8n não for HTTPS.");
+    alert("Erro de conexão com webhook.");
   }
-  btn.disabled = false; btn.innerText = "🚀 ENVIAR TUDO PARA O N8N";
+
+  btn.disabled = false;
+  btn.innerText = "🚀 ENVIAR TUDO PARA O N8N";
 }
 </script>
-</body>
-</html>
