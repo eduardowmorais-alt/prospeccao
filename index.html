@@ -4,222 +4,164 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buscador de Contatos — Disparo WhatsApp</title>
+
+<script async defer 
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbSmfsgUVtmR9FbDIdMeX4lePOl138GXQ&libraries=places">
+</script>
+
 <style>
-  :root {
-    --bg: #f9f9f8; --bg2: #f0efea; --bg3: #e8e7e2; --card: #ffffff;
-    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
-    --text: #1a1a1a; --text2: #6b6b68; --text3: #9b9b98;
-    --info-bg: #e6f1fb; --info-text: #0c447c;
-    --success-bg: #eaf3de; --success-text: #27500a;
-    --warning-bg: #faeeda; --warning-text: #633806;
-    --danger-bg: #fcebeb; --danger-text: #791f1f;
-    --radius: 8px; --radius-lg: 12px;
-    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --mono: 'SF Mono', 'Fira Code', monospace;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; }
-  .topbar { background: var(--card); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 12px; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .topbar-logo { font-size: 16px; font-weight: 600; }
-  .topbar-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); }
-  .status-dot.running { background: #22c55e; }
-  .status-dot.paused { background: #f59e0b; }
-  .container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-  .step-bar { display: flex; align-items: center; margin-bottom: 2rem; }
-  .step { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); }
-  .step.active { color: var(--text); font-weight: 500; }
-  .step-dot { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 12px; }
-  .sep { flex: 1; height: 0.5px; background: var(--border); margin: 0 10px; }
-  .card { background: var(--card); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; }
-  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; }
-  label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; }
-  input, select, textarea { width: 100%; padding: 9px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; outline: none; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-  button { padding: 9px 18px; border-radius: var(--radius); cursor: pointer; font-weight: 500; border: 0.5px solid var(--border2); background: #fff; }
-  button.primary { background: var(--text); color: #fff; border: none; }
-  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.25rem; }
-  .metric { background: var(--bg2); border-radius: var(--radius); padding: 1rem; text-align: center; }
-  .metric-n { font-size: 24px; font-weight: 600; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th, td { text-align: left; padding: 10px; border-bottom: 0.5px solid var(--border); }
-  #log-box { font-family: var(--mono); font-size: 11px; background: #1a1a1a; color: #ccc; border-radius: 8px; padding: 12px; max-height: 150px; overflow-y: auto; margin-top: 10px; }
-  .log-ok { color: #86efac; } .log-err { color: #fca5a5; }
-  .hidden { display: none; }
+body { font-family: Arial; background:#f5f5f5; padding:20px; }
+input,button { padding:10px; margin:5px; }
+#log { background:#000; color:#0f0; padding:10px; height:150px; overflow:auto; font-size:12px;}
+table { width:100%; margin-top:10px; border-collapse: collapse;}
+td,th { border:1px solid #ccc; padding:5px; }
 </style>
 </head>
+
 <body>
 
-<div class="topbar">
-  <div class="topbar-logo">Buscador Pro — Eduardo</div>
-  <div class="topbar-status"><div class="status-dot" id="top-dot"></div> <span id="top-status">Aguardando</span></div>
-</div>
+<h2>Buscador + Disparo WhatsApp</h2>
 
-<div class="container">
-  <div class="card">
-    <div class="card-title">Configurações Iniciais</div>
-    <div class="grid2">
-      <div>
-        <label>Google Maps API Key</label>
-        <input type="password" id="gkey" placeholder="AIzaSy...">
-      </div>
-      <div>
-        <label>Claude API Key</label>
-        <input type="password" id="claudekey" placeholder="sk-ant-...">
-      </div>
-    </div>
-    <div class="grid3" style="margin-top:15px">
-      <input type="text" id="z-id" placeholder="Instance ID">
-      <input type="password" id="z-token" placeholder="Instance Token">
-      <input type="password" id="z-client" placeholder="Client Token">
-    </div>
-    <button class="primary" onclick="initGoogleMaps()" style="width:100%; margin-top:15px">Conectar e Iniciar</button>
-  </div>
+<input id="termo" placeholder="Ex: Manicure">
+<input id="cidade" placeholder="Cidade">
+<button onclick="buscar()">Buscar</button>
 
-  <div class="card">
-    <div class="card-title">Filtros de Busca</div>
-    <div class="grid3">
-      <input type="text" id="termo" placeholder="Ex: Manicure">
-      <input type="text" id="cidade" placeholder="Cidade">
-      <select id="maxres">
-        <option value="10">10 resultados</option>
-        <option value="20" selected>20 resultados</option>
-        <option value="60">60 resultados</option>
-      </select>
-    </div>
-    <button class="primary" id="btn-buscar" onclick="buscarLocais()" style="width:100%; margin-top:15px" disabled>Buscar Contatos</button>
-  </div>
+<br><br>
 
-  <div class="metrics">
-    <div class="metric"><div class="metric-n" id="m-total">0</div><div class="metric-l">Encontrados</div></div>
-    <div class="metric"><div class="metric-n" id="m-phone">0</div><div class="metric-l">Com Telefone</div></div>
-    <div class="metric"><div class="metric-n" id="m-sent">0</div><div class="metric-l">Enviados</div></div>
-    <div class="metric"><div class="metric-n" id="m-pending">0</div><div class="metric-l">Fila</div></div>
-  </div>
+<input id="z-id" placeholder="Instance ID">
+<input id="z-token" placeholder="Instance Token">
+<input id="z-client" placeholder="Client Token">
 
-  <div class="card hidden" id="panel-results">
-    <table id="tabela-contatos">
-      <thead>
-        <tr><th>Nome</th><th>Telefone</th><th>Status</th></tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <button class="primary" onclick="iniciarDisparo()" style="width:100%; margin-top:15px">Iniciar Envios via WhatsApp</button>
-  </div>
+<br><br>
+<button onclick="iniciarDisparo()">Disparar WhatsApp</button>
 
-  <div id="log-box">Aguardando chaves para conectar...</div>
-</div>
+<table>
+<thead><tr><th>Nome</th><th>Telefone</th><th>Status</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
 
-<div id="map" style="display:none"></div>
+<div id="log"></div>
 
 <script>
-let contatos = [], enviados = 0, service, map;
 
-function log(msg, tipo) {
-  const box = document.getElementById('log-box');
-  const color = tipo === 'ok' ? 'log-ok' : tipo === 'err' ? 'log-err' : '';
-  box.innerHTML += `<div class="${color}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-  box.scrollTop = box.scrollHeight;
+let contatos = [];
+let enviados = 0;
+
+function log(msg){
+  const el = document.getElementById('log');
+  el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+  el.scrollTop = el.scrollHeight;
 }
 
-// SOLUÇÃO PARA O ERRO DE CORS: Carregar a biblioteca oficial do Google
-function initGoogleMaps() {
-  const key = document.getElementById('gkey').value.trim();
-  if(!key) return alert("Insira a chave do Google");
-  
-  log("Conectando ao Google Maps...", "ok");
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&callback=mapsLoaded`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-}
+// 🔥 BUSCA CORRIGIDA
+function buscar(){
 
-function mapsLoaded() {
-  log("Google Maps conectado com sucesso!", "ok");
-  document.getElementById('btn-buscar').disabled = false;
-  map = new google.maps.Map(document.getElementById('map'));
-  service = new google.maps.places.PlacesService(map);
-}
+  if (typeof google === 'undefined' || !google.maps) {
+    log("⏳ Google ainda carregando... tentando novamente...");
+    setTimeout(buscar,2000);
+    return;
+  }
 
-function buscarLocais() {
   const termo = document.getElementById('termo').value;
   const cidade = document.getElementById('cidade').value;
-  
-  log(`Buscando ${termo} em ${cidade}...`);
-  
-  const request = {
-    query: `${termo} em ${cidade}`,
-    fields: ['name', 'place_id', 'formatted_address', 'geometry']
-  };
 
-  service.textSearch(request, (results, status) => {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-      contatos = [];
-      results.forEach(place => {
-        // Para cada lugar, buscamos o detalhe (telefone)
-        service.getDetails({ placeId: place.place_id, fields: ['name', 'formatted_phone_number'] }, (details, s2) => {
-          if (s2 === google.maps.places.PlacesServiceStatus.OK) {
-            contatos.push({
-              nome: details.name,
-              telefone: details.formatted_phone_number || '',
-              status: details.formatted_phone_number ? 'Pendente' : 'Sem Fone'
-            });
-            render();
-          }
-        });
-      });
-      document.getElementById('panel-results').classList.remove('hidden');
-    } else {
-      log("Erro na busca: " + status, "err");
+  const map = new google.maps.Map(document.createElement('div'));
+  const service = new google.maps.places.PlacesService(map);
+
+  contatos = [];
+
+  service.textSearch({ query: `${termo} em ${cidade}` }, (results, status) => {
+
+    if (status !== google.maps.places.PlacesServiceStatus.OK){
+      log("Erro: "+status);
+      return;
     }
+
+    let total = results.length;
+    let done = 0;
+
+    results.forEach(p => {
+      service.getDetails({
+        placeId: p.place_id,
+        fields: ['name','formatted_phone_number']
+      }, (d, s2) => {
+
+        done++;
+
+        if (s2 === google.maps.places.PlacesServiceStatus.OK){
+          contatos.push({
+            nome: d.name,
+            telefone: d.formatted_phone_number || '',
+            status: d.formatted_phone_number ? 'Pendente' : 'Sem telefone'
+          });
+        }
+
+        if (done === total){
+          render();
+          log("Busca finalizada!");
+        }
+
+      });
+    });
+
   });
 }
 
-function render() {
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = contatos.map(c => `
-    <tr><td>${c.nome}</td><td>${c.telefone}</td><td>${c.status}</td></tr>
+function render(){
+  document.getElementById('tbody').innerHTML = contatos.map(c=>`
+    <tr>
+      <td>${c.nome}</td>
+      <td>${c.telefone}</td>
+      <td>${c.status}</td>
+    </tr>
   `).join('');
-  document.getElementById('m-total').textContent = contatos.length;
-  document.getElementById('m-phone').textContent = contatos.filter(x => x.telefone).length;
 }
 
-async function iniciarDisparo() {
-  log("Iniciando fila de disparos...", "ok");
-  for (let c of contatos) {
-    if (c.status === 'Pendente' && c.telefone) {
-      log(`Enviando para ${c.nome}...`);
-      await enviarZapi(c);
-      await new Promise(r => setTimeout(r, 30000)); // Espera 30s entre envios para segurança
+// 🚀 DISPARO
+async function iniciarDisparo(){
+  log("Iniciando disparo...");
+
+  for (let c of contatos){
+    if (c.telefone && c.status === 'Pendente'){
+
+      await enviar(c);
+
+      await new Promise(r=>setTimeout(r,30000)); // 30s
     }
   }
 }
 
-async function enviarZapi(c) {
+async function enviar(c){
+
   const id = document.getElementById('z-id').value;
   const token = document.getElementById('z-token').value;
   const client = document.getElementById('z-client').value;
-  
-  const fone = c.telefone.replace(/\D/g, '');
-  
-  try {
-    const res = await fetch(`https://api.z-api.io/instances/${id}/token/${token}/send-text`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Client-Token': client },
-      body: JSON.stringify({ phone: '55' + fone, message: `Olá ${c.nome}, tudo bem?` })
+
+  const phone = '55'+c.telefone.replace(/\D/g,'');
+
+  try{
+    const res = await fetch(`https://api.z-api.io/instances/${id}/token/${token}/send-text`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Client-Token':client},
+      body: JSON.stringify({
+        phone,
+        message: `Olá ${c.nome}, tudo bem?`
+      })
     });
-    if (res.ok) {
-      c.status = 'Enviado';
+
+    if(res.ok){
+      c.status='Enviado';
       enviados++;
-      document.getElementById('m-sent').textContent = enviados;
+      log(`Enviado para ${c.nome}`);
       render();
     }
-  } catch (e) {
-    log("Erro Z-API: " + e.message, "err");
+
+  }catch(e){
+    log("Erro envio: "+e.message);
   }
 }
+
 </script>
+
 </body>
 </html>
